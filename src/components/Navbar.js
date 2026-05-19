@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Layers, User, Settings, ShieldAlert, Sparkles, LogIn } from 'lucide-react';
+import { Layers, User, Settings, ShieldAlert, Sparkles, Lock, Unlock } from 'lucide-react';
 
-export default function Navbar({ activePortal, setActivePortal }) {
+export default function Navbar({ activePortal, setActivePortal, isAdminUnlocked, onLockToggle }) {
   return (
     <header className="glass-panel" style={{
       position: 'sticky',
@@ -32,7 +32,7 @@ export default function Navbar({ activePortal, setActivePortal }) {
         <div>
           <h1 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span className="text-gradient">AdVantage</span>
-            <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(15,23,42,0.05)', borderRadius: '4px', letterSpacing: '1px', fontFamily: 'var(--font-mono)', verticalAlign: 'middle', border: '1px solid rgba(15,23,42,0.08)', color: 'var(--text-secondary)' }}>v1.0</span>
+            <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', letterSpacing: '1px', fontFamily: 'var(--font-mono)', verticalAlign: 'middle', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>v1.0</span>
           </h1>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>OUTDOOR ADVERTISING PLATFORM</p>
         </div>
@@ -41,10 +41,10 @@ export default function Navbar({ activePortal, setActivePortal }) {
       {/* Portal Switches */}
       <div style={{
         display: 'flex',
-        background: 'rgba(15, 23, 42, 0.05)',
+        background: 'rgba(255, 255, 255, 0.03)',
         padding: '6px',
         borderRadius: '14px',
-        border: '1px solid rgba(15, 23, 42, 0.08)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         gap: '6px'
       }}>
         <button
@@ -53,7 +53,7 @@ export default function Navbar({ activePortal, setActivePortal }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: activePortal === 'advertiser' ? 'linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(6,182,212,0.1) 100%)' : 'transparent',
+            background: activePortal === 'advertiser' ? 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(139,92,246,0.05) 100%)' : 'transparent',
             border: activePortal === 'advertiser' ? '1px solid rgba(6, 182, 212, 0.4)' : '1px solid transparent',
             color: activePortal === 'advertiser' ? 'var(--accent-cyan)' : 'var(--text-secondary)',
             padding: '8px 18px',
@@ -75,8 +75,8 @@ export default function Navbar({ activePortal, setActivePortal }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: activePortal === 'owner' ? 'linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(6,182,212,0.1) 100%)' : 'transparent',
-            border: activePortal === 'owner' ? '1px solid rgba(124, 58, 237, 0.4)' : '1px solid transparent',
+            background: activePortal === 'owner' ? 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(6,182,212,0.05) 100%)' : 'transparent',
+            border: activePortal === 'owner' ? '1px solid rgba(139, 92, 246, 0.4)' : '1px solid transparent',
             color: activePortal === 'owner' ? 'var(--accent-purple)' : 'var(--text-secondary)',
             padding: '8px 18px',
             borderRadius: '10px',
@@ -91,37 +91,62 @@ export default function Navbar({ activePortal, setActivePortal }) {
           Holder Owner
         </button>
 
-        <button
-          onClick={() => setActivePortal('admin')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: activePortal === 'admin' ? 'linear-gradient(135deg, rgba(244,63,94,0.15) 0%, rgba(244,63,94,0.05) 100%)' : 'transparent',
-            border: activePortal === 'admin' ? '1px solid rgba(244, 63, 94, 0.4)' : '1px solid transparent',
-            color: activePortal === 'admin' ? '#fb7185' : 'var(--text-secondary)',
-            padding: '8px 18px',
-            borderRadius: '10px',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            fontFamily: 'var(--font-mono)',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <ShieldAlert style={{ width: '16px', height: '16px' }} />
-          Admin Control
-        </button>
+        {isAdminUnlocked && (
+          <button
+            onClick={() => setActivePortal('admin')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: activePortal === 'admin' ? 'linear-gradient(135deg, rgba(244,63,94,0.15) 0%, rgba(244,63,94,0.05) 100%)' : 'transparent',
+              border: activePortal === 'admin' ? '1px solid rgba(244, 63, 94, 0.4)' : '1px solid transparent',
+              color: activePortal === 'admin' ? '#fb7185' : 'var(--text-secondary)',
+              padding: '8px 18px',
+              borderRadius: '10px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              fontFamily: 'var(--font-mono)',
+              cursor: 'pointer',
+              transition: 'var(--transition-smooth)'
+            }}
+          >
+            <ShieldAlert style={{ width: '16px', height: '16px' }} />
+            Admin Control
+          </button>
+        )}
       </div>
 
       {/* Simulated User Profile */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Sleek Admin Security Lock Button */}
+        <button
+          onClick={onLockToggle}
+          title={isAdminUnlocked ? "Lock Admin Session" : "Access Admin Portal"}
+          style={{
+            background: isAdminUnlocked ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+            border: isAdminUnlocked ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--border-glass)',
+            borderRadius: '10px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: isAdminUnlocked ? 'var(--accent-emerald)' : 'var(--text-secondary)',
+            transition: 'var(--transition-smooth)',
+            boxShadow: isAdminUnlocked ? '0 0 10px rgba(16, 185, 129, 0.15)' : 'none'
+          }}
+        >
+          {isAdminUnlocked ? <Unlock style={{ width: '16px', height: '16px' }} /> : <Lock style={{ width: '16px', height: '16px' }} />}
+        </button>
+
         <div style={{ textAlign: 'right', display: 'none', md: 'block' }}>
-          <p style={{ fontSize: '0.85rem', fontWeight: '600' }}>Amit Sharma</p>
+          <p style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Amit Sharma</p>
           <p style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
             <Sparkles style={{ width: '10px', height: '10px' }} /> Premium Biz
           </p>
         </div>
+
         <div style={{
           width: '40px',
           height: '40px',
@@ -129,7 +154,7 @@ export default function Navbar({ activePortal, setActivePortal }) {
           border: '2px solid var(--accent-cyan)',
           padding: '2px',
           cursor: 'pointer',
-          background: 'rgba(15,23,42,0.05)',
+          background: 'rgba(255,255,255,0.05)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'

@@ -13,6 +13,37 @@ export default function Home() {
   const [activePortal, setActivePortal] = useState('advertiser');
   const [billboards, setBillboards] = useState(INITIAL_BILLBOARDS);
   
+  // Security Authentication states
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
+  const [showAdminAuth, setShowAdminAuth] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [error, setError] = useState('');
+
+  // Lock session or open auth passcode prompt
+  const handleLockToggle = () => {
+    if (isAdminUnlocked) {
+      setIsAdminUnlocked(false);
+      if (activePortal === 'admin') {
+        setActivePortal('advertiser');
+      }
+    } else {
+      setShowAdminAuth(true);
+    }
+  };
+
+  // Submit passcode
+  const handleAuthSubmit = () => {
+    if (passcode.toLowerCase() === 'admin' || passcode === 'admin123') {
+      setIsAdminUnlocked(true);
+      setShowAdminAuth(false);
+      setActivePortal('admin');
+      setPasscode('');
+      setError('');
+    } else {
+      setError('ACCESS DENIED: Invalid passcode key.');
+    }
+  };
+
   // Seed initial ledger bookings so admin starts with beautiful stats
   const [bookings, setBookings] = useState([
     {
@@ -78,7 +109,12 @@ export default function Home() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
       {/* Immersive Header Navigation */}
-      <Navbar activePortal={activePortal} setActivePortal={setActivePortal} />
+      <Navbar 
+        activePortal={activePortal} 
+        setActivePortal={setActivePortal} 
+        isAdminUnlocked={isAdminUnlocked}
+        onLockToggle={handleLockToggle}
+      />
 
       {/* Main Container */}
       <main style={{ flex: 1, padding: '0 24px', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
@@ -90,8 +126,8 @@ export default function Home() {
             {/* Startup Banner Hero Section */}
             <div className="glass-panel" style={{
               padding: '48px 32px',
-              border: '1px solid rgba(255,255,255,0.06)',
-              background: 'radial-gradient(circle at 80% 20%, rgba(6,182,212,0.15) 0%, transparent 60%), radial-gradient(circle at 10% 80%, rgba(124,58,237,0.15) 0%, transparent 60%), rgba(15, 14, 23, 0.7)',
+              border: '1px solid var(--border-glass)',
+              background: 'radial-gradient(circle at 80% 20%, rgba(6,182,212,0.08) 0%, transparent 60%), radial-gradient(circle at 10% 80%, rgba(124,58,237,0.08) 0%, transparent 60%), rgba(255, 255, 255, 0.75)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -169,7 +205,7 @@ export default function Home() {
         )}
 
         {/* Administration Platform Control View */}
-        {activePortal === 'admin' && (
+        {activePortal === 'admin' && isAdminUnlocked && (
           <AdminPortal
             billboards={billboards}
             bookings={bookings}
@@ -180,7 +216,115 @@ export default function Home() {
 
       </main>
 
-      {/* Common beautiful footer footer */}
+      {/* Admin security verification modal */}
+      {showAdminAuth && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.4)',
+          backdropFilter: 'blur(20px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px'
+        }}>
+          <div className="glass-panel animate-fade-in" style={{
+            width: '100%',
+            maxWidth: '420px',
+            padding: '36px',
+            border: '1px solid rgba(124, 58, 237, 0.2)',
+            background: 'rgba(255, 255, 255, 0.98)',
+            boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.1), var(--shadow-neon-purple)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '24px'
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(124, 58, 237, 0.08)',
+              border: '1px solid rgba(124, 58, 237, 0.2)',
+              color: 'var(--accent-purple)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 20px rgba(124, 58, 237, 0.1)'
+            }}>
+              <ShieldAlert style={{ width: '32px', height: '32px' }} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Security Authorization</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
+                Enter the administrative key code to unlock the core system ledger.
+              </p>
+            </div>
+
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+              <span className="label-text">ADMIN PASSCODE</span>
+              <input
+                type="password"
+                className="input-field"
+                placeholder="••••••••"
+                value={passcode}
+                onChange={(e) => {
+                  setPasscode(e.target.value);
+                  setError('');
+                }}
+                style={{
+                  textAlign: 'center',
+                  fontSize: '1.2rem',
+                  letterSpacing: '0.2em',
+                  fontFamily: 'monospace'
+                }}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAuthSubmit();
+                }}
+              />
+              {error && (
+                <p style={{ color: 'var(--accent-rose)', fontSize: '0.75rem', textAlign: 'center', marginTop: '4px', fontWeight: '600' }}>
+                  {error}
+                </p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
+              <button
+                onClick={() => {
+                  setShowAdminAuth(false);
+                  setPasscode('');
+                  setError('');
+                }}
+                className="btn-outline"
+                style={{ flex: 1, justifyContent: 'center', padding: '10px' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAuthSubmit}
+                className="btn-neon-purple"
+                style={{ flex: 1.5, justifyContent: 'center', padding: '10px' }}
+              >
+                Authorize
+              </button>
+            </div>
+            
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              Hint: use <strong style={{ color: 'var(--accent-purple)' }}>admin</strong> to authenticate
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Common beautiful footer */}
       <Footer />
     </div>
   );
