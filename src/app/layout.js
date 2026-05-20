@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'AdVantage | Premium Outdoor Advertising Marketplace',
+  title: 'AdNazar | Premium Outdoor Advertising Marketplace',
   description: 'Discover, design, and book premium outdoor billboards with 3D live previews, real-time traffic analytics, and custom Canva-style poster editors.',
   keywords: 'billboard marketplace, outdoor advertising, hoarding booking, 3D billboard preview, traffic analytics advertising, print outdoor media, local business advertising',
 };

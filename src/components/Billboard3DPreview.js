@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Sparkles, Eye, Maximize2, Zap, RotateCcw } from 'lucide-react';
+import { Sparkles, Eye, Zap, RotateCcw } from 'lucide-react';
 
-export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBillboard }) {
+export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBillboard, theme }) {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const sceneRef = useRef(null);
@@ -12,7 +12,13 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
   const billboardScreenRef = useRef(null);
   const requestRef = useRef(null);
   const [isRotating, setIsRotating] = useState(true);
-  const [dayNightMode, setDayNightMode] = useState('day'); // 'night' or 'day'
+  const [dayNightMode, setDayNightMode] = useState('night'); // Default to night for gorgeous glow
+
+  useEffect(() => {
+    if (theme) {
+      setDayNightMode(theme === 'light' ? 'day' : 'night');
+    }
+  }, [theme]);
 
   // Standard placeholder if no custom poster
   const fallbackUrl = activeBillboard?.image || 'https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&w=800&q=80';
@@ -23,15 +29,14 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
     const width = containerRef.current.clientWidth || 500;
     const height = 400;
 
-    // 1. Scene setup with futuristic sky color
+    // 1. Scene setup with rich sky values
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(dayNightMode === 'night' ? 0x050409 : 0xbae6fd);
-    scene.fog = new THREE.FogExp2(dayNightMode === 'night' ? 0x050409 : 0xbae6fd, 0.015);
+    scene.background = new THREE.Color(dayNightMode === 'night' ? 0x050409 : 0xe0f2fe);
+    scene.fog = new THREE.FogExp2(dayNightMode === 'night' ? 0x050409 : 0xe0f2fe, 0.015);
     sceneRef.current = scene;
 
     // 2. Camera setup
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    // Position camera looking slightly up at the billboard from the road
     camera.position.set(0, 5, 25);
     camera.lookAt(0, 8, 0);
 
@@ -48,13 +53,13 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     // 4. Lights
     const ambientLight = new THREE.AmbientLight(
-      dayNightMode === 'night' ? 0x221144 : 0xffffff,
-      dayNightMode === 'night' ? 0.6 : 1.2
+      dayNightMode === 'night' ? 0x1f1936 : 0xffffff,
+      dayNightMode === 'night' ? 0.7 : 1.3
     );
     scene.add(ambientLight);
 
     // Spotlight facing the billboard screen
-    const spotLight = new THREE.SpotLight(0xffffff, dayNightMode === 'night' ? 8 : 2);
+    const spotLight = new THREE.SpotLight(0xffffff, dayNightMode === 'night' ? 9 : 2);
     spotLight.position.set(0, 18, 12);
     spotLight.angle = Math.PI / 4;
     spotLight.penumbra = 0.5;
@@ -63,11 +68,11 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     // Extra ground glow lights at night
     if (dayNightMode === 'night') {
-      const roadLight1 = new THREE.PointLight(0x06b6d4, 2, 20);
+      const roadLight1 = new THREE.PointLight(0xf97316, 2, 20); // Saffron light glow
       roadLight1.position.set(-15, 0.5, 5);
       scene.add(roadLight1);
 
-      const roadLight2 = new THREE.PointLight(0x7c3aed, 2, 20);
+      const roadLight2 = new THREE.PointLight(0x6366f1, 2, 20); // Indigo light glow
       roadLight2.position.set(15, 0.5, 5);
       scene.add(roadLight2);
     }
@@ -76,7 +81,7 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
     // Ground / Road Plane
     const groundGeo = new THREE.PlaneGeometry(100, 100);
     const groundMat = new THREE.MeshStandardMaterial({
-      color: dayNightMode === 'night' ? 0x0c0b13 : 0x475569,
+      color: dayNightMode === 'night' ? 0x090812 : 0x334155,
       roughness: 0.8,
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -84,11 +89,11 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Road Markings (White dashes on highway)
+    // Road Markings
     const roadMarkingsGeo = new THREE.PlaneGeometry(1, 100);
     const roadMarkingsMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
-      opacity: dayNightMode === 'night' ? 0.3 : 0.8,
+      opacity: dayNightMode === 'night' ? 0.25 : 0.7,
       transparent: true,
     });
     const roadMarkings = new THREE.Mesh(roadMarkingsGeo, roadMarkingsMat);
@@ -98,7 +103,7 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     // Highway side guard rails
     const railGeo = new THREE.BoxGeometry(0.2, 0.5, 100);
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
     const railLeft = new THREE.Mesh(railGeo, railMat);
     railLeft.position.set(-10, 0.25, 0);
     const railRight = railLeft.clone();
@@ -107,10 +112,10 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
     scene.add(railRight);
 
     // 6. Billboard Structure
-    // Main Unipole Steel Column
+    // Main Unipole Column
     const poleGeo = new THREE.CylinderGeometry(0.5, 0.6, 12, 16);
     const poleMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
+      color: 0x0f172a,
       metalness: 0.8,
       roughness: 0.2
     });
@@ -128,7 +133,7 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     // Back Panel
     const backGeo = new THREE.BoxGeometry(16, 8, 0.6);
-    const backMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+    const backMat = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.5 });
     const backPanel = new THREE.Mesh(backGeo, backMat);
     backPanel.position.set(0, 12, 0);
     backPanel.castShadow = true;
@@ -136,21 +141,19 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     // Screen frame
     const frameGeo = new THREE.BoxGeometry(16.4, 8.4, 0.2);
-    const frameMat = new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.9, roughness: 0.1 });
+    const frameMat = new THREE.MeshStandardMaterial({ color: 0x090812, metalness: 0.9, roughness: 0.1 });
     const frame = new THREE.Mesh(frameGeo, frameMat);
     frame.position.set(0, 12, 0.1);
     scene.add(frame);
 
-    // 7. Billboard Screen (The actual advertisement texture)
+    // 7. Billboard Screen (Dynamic Canva texture)
     const screenGeo = new THREE.PlaneGeometry(15.6, 7.6);
     let screenMat;
 
     // Load initial texture
     const textureLoader = new THREE.TextureLoader();
     
-    // We create a function to apply texture
     const updateBillboardTexture = () => {
-      // If we have an active Canva canvas reference, create dynamic texture
       if (canvasRef && canvasRef.current) {
         try {
           const texture = new THREE.CanvasTexture(canvasRef.current);
@@ -185,13 +188,12 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
       }
     };
 
-    // Standard screen material
     screenMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.1,
       metalness: 0.1,
       emissive: new THREE.Color(0xffffff),
-      emissiveIntensity: dayNightMode === 'night' ? 0.35 : 0.05, // glow at night
+      emissiveIntensity: dayNightMode === 'night' ? 0.45 : 0.05,
     });
 
     const billboardScreen = new THREE.Mesh(screenGeo, screenMat);
@@ -201,51 +203,88 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     updateBillboardTexture();
 
-    // 8. Simulated moving traffic: Small glowing neon boxes
-    const cars = [];
-    const carColors = [0xef4444, 0x06b6d4, 0x10b981, 0xfacc15];
+    // 8. Spawning Localized Moving Traffic: Cars and Indian Auto-Rickshaws!
+    const vehicles = [];
+    const carColors = [0xef4444, 0x06b6d4, 0x6366f1, 0xffffff];
     
-    const createCar = (isIncoming) => {
-      const color = carColors[Math.floor(Math.random() * carColors.length)];
-      const carGeo = new THREE.BoxGeometry(0.6, 0.4, 1.2);
-      const carMat = new THREE.MeshStandardMaterial({
-        color: color,
-        emissive: new THREE.Color(color),
-        emissiveIntensity: dayNightMode === 'night' ? 1.5 : 0.2
-      });
-      const carMesh = new THREE.Mesh(carGeo, carMat);
+    const createVehicle = (isIncoming) => {
+      const isRickshaw = Math.random() > 0.45; // 55% chance of spawning an Indian auto-rickshaw
+      let vehicleMesh;
+
+      if (isRickshaw) {
+        // Create an Auto-Rickshaw compound mesh
+        const rickshawGroup = new THREE.Group();
+        
+        // Green bottom chassis
+        const bottomGeo = new THREE.BoxGeometry(0.7, 0.4, 1.1);
+        const bottomMat = new THREE.MeshStandardMaterial({
+          color: 0x15803d, // Indian Auto Rickshaw Green
+          roughness: 0.5,
+          emissive: 0x15803d,
+          emissiveIntensity: dayNightMode === 'night' ? 0.25 : 0.0
+        });
+        const bottom = new THREE.Mesh(bottomGeo, bottomMat);
+        bottom.position.y = 0.2;
+        rickshawGroup.add(bottom);
+
+        // Yellow canopy roof
+        const canopyGeo = new THREE.BoxGeometry(0.65, 0.4, 0.7);
+        const canopyMat = new THREE.MeshStandardMaterial({
+          color: 0xeab308, // Auto Rickshaw Yellow Roof
+          roughness: 0.6,
+          emissive: 0xeab308,
+          emissiveIntensity: dayNightMode === 'night' ? 0.2 : 0.0
+        });
+        const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+        canopy.position.set(0, 0.55, -0.1);
+        rickshawGroup.add(canopy);
+
+        vehicleMesh = rickshawGroup;
+      } else {
+        // Create a Standard glowing sedan box
+        const color = carColors[Math.floor(Math.random() * carColors.length)];
+        const carGeo = new THREE.BoxGeometry(0.6, 0.4, 1.2);
+        const carMat = new THREE.MeshStandardMaterial({
+          color: color,
+          emissive: new THREE.Color(color),
+          emissiveIntensity: dayNightMode === 'night' ? 1.2 : 0.2
+        });
+        const sedan = new THREE.Mesh(carGeo, carMat);
+        sedan.position.y = 0.2;
+        vehicleMesh = sedan;
+      }
       
-      // Position
+      // Position on lane
       const x = isIncoming ? -3.5 : 3.5;
       const z = isIncoming ? 50 : -50;
-      carMesh.position.set(x, 0.25, z);
-      scene.add(carMesh);
+      vehicleMesh.position.set(x, 0.05, z);
+      scene.add(vehicleMesh);
       
-      // Add small glowing headlight meshes
-      const lightGeo = new THREE.SphereGeometry(0.1, 8, 8);
-      const lightMat = new THREE.MeshBasicMaterial({ color: isIncoming ? 0xffffff : 0xff3333 });
+      // Add glowing headlights
+      const lightGeo = new THREE.SphereGeometry(0.08, 8, 8);
+      const lightMat = new THREE.MeshBasicMaterial({ color: isIncoming ? 0xfef08a : 0xef4444 });
       
       const light1 = new THREE.Mesh(lightGeo, lightMat);
-      light1.position.set(-0.2, 0, isIncoming ? -0.6 : 0.6);
-      carMesh.add(light1);
+      light1.position.set(-0.22, 0.25, isIncoming ? -0.55 : 0.55);
+      vehicleMesh.add(light1);
 
       const light2 = light1.clone();
-      light2.position.x = 0.2;
-      carMesh.add(light2);
+      light2.position.x = 0.22;
+      vehicleMesh.add(light2);
 
       return {
-        mesh: carMesh,
-        speed: (Math.random() * 0.4 + 0.3) * (isIncoming ? -1 : 1),
+        mesh: vehicleMesh,
+        speed: (Math.random() * 0.35 + 0.25) * (isIncoming ? -1 : 1),
         isIncoming
       };
     };
 
-    // Spawn initial cars
-    for (let i = 0; i < 8; i++) {
+    // Spawn initial items
+    for (let i = 0; i < 9; i++) {
       const isIncoming = Math.random() > 0.5;
-      const car = createCar(isIncoming);
-      car.mesh.position.z = Math.random() * 100 - 50;
-      cars.push(car);
+      const v = createVehicle(isIncoming);
+      v.mesh.position.z = Math.random() * 100 - 50;
+      vehicles.push(v);
     }
 
     // 9. Animation loop
@@ -253,24 +292,24 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
     const animate = () => {
       requestRef.current = requestAnimationFrame(animate);
 
-      // Slow camera panning around the billboard
+      // Camera panning orbit
       if (isRotating) {
-        angle += 0.003;
+        angle += 0.0025;
         camera.position.x = Math.sin(angle) * 22;
         camera.position.z = Math.cos(angle) * 16 + 10;
         camera.position.y = 5 + Math.sin(angle * 2) * 1.5;
         camera.lookAt(0, 10, 0);
       }
 
-      // Animate cars on the highway
-      cars.forEach((car, index) => {
-        car.mesh.position.z += car.speed;
+      // Move vehicles
+      vehicles.forEach((v) => {
+        v.mesh.position.z += v.speed;
         
-        // Reset cars that go out of bounds
-        if (car.isIncoming && car.mesh.position.z < -50) {
-          car.mesh.position.z = 50;
-        } else if (!car.isIncoming && car.mesh.position.z > 50) {
-          car.mesh.position.z = -50;
+        // Reset when boundaries crossed
+        if (v.isIncoming && v.mesh.position.z < -50) {
+          v.mesh.position.z = 50;
+        } else if (!v.isIncoming && v.mesh.position.z > 50) {
+          v.mesh.position.z = -50;
         }
       });
 
@@ -290,12 +329,12 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
 
     window.addEventListener('resize', handleResize);
 
-    // Watch for texture updates on interval in case canvas drawing is busy
+    // Dynamic texture syncer
     const interval = setInterval(() => {
       if (canvasRef && canvasRef.current && textureRef.current) {
         textureRef.current.needsUpdate = true;
         if (billboardScreenRef.current) {
-          billboardScreenRef.current.material.emissiveIntensity = dayNightMode === 'night' ? 0.35 : 0.05;
+          billboardScreenRef.current.material.emissiveIntensity = dayNightMode === 'night' ? 0.45 : 0.05;
         }
       }
     }, 400);
@@ -319,10 +358,8 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
       screenGeo.dispose();
       screenMat.dispose();
       if (textureRef.current) textureRef.current.dispose();
-      cars.forEach(car => {
-        scene.remove(car.mesh);
-        car.mesh.geometry.dispose();
-        car.mesh.material.dispose();
+      vehicles.forEach(v => {
+        scene.remove(v.mesh);
       });
     };
   }, [posterDataUrl, activeBillboard, canvasRef, isRotating, dayNightMode]);
@@ -409,8 +446,8 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
           width: '100%',
           height: '400px',
           borderRadius: '12px',
-          background: '#040307',
-          border: '1px solid rgba(255,255,255,0.05)',
+          background: 'var(--bg-primary)',
+          border: '1px solid var(--border-glass)',
           overflow: 'hidden',
           display: 'flex',
           justifyContent: 'center',
@@ -425,10 +462,10 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'rgba(0,0,0,0.3)',
+        background: 'var(--bg-tertiary)',
         padding: '12px 16px',
         borderRadius: '10px',
-        border: '1px solid rgba(255,255,255,0.03)',
+        border: '1px solid var(--border-glass)',
         fontSize: '0.8rem',
         color: 'var(--text-secondary)'
       }}>
@@ -442,9 +479,9 @@ export default function Billboard3DPreview({ canvasRef, posterDataUrl, activeBil
         </div>
         <div style={{ textAlign: 'right' }}>
           <span className="badge badge-purple" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-            <Sparkles style={{ width: '10px', height: '10px' }} /> Realtime Sync
+            <Sparkles style={{ width: '10px', height: '10px' }} /> Auto-Rickshaws Active
           </span>
-          <p style={{ fontSize: '0.7rem', marginTop: '4px' }}>WebGl 60 FPS</p>
+          <p style={{ fontSize: '0.7rem', marginTop: '4px' }}>WebGL 60 FPS</p>
         </div>
       </div>
     </div>

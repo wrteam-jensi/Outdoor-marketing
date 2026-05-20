@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark } from 'lucide-react';
+import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark, FileText, ArrowRight } from 'lucide-react';
 
 export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -22,6 +22,12 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Bank payout states
+  const [bankLinked, setBankLinked] = useState(false);
+  const [upiHandle, setUpiHandle] = useState('amit@okaxis');
+  const [ifscCode, setIfscCode] = useState('HDFC0001234');
+  const [showBankSetup, setShowBankSetup] = useState(false);
   
   // Financial metrics mock calculations
   const totalListings = billboards.length;
@@ -48,7 +54,6 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
         if (prev >= 100) {
           clearInterval(interval);
           setIsUploading(false);
-          // Set a random high-quality billboard image as standard placeholder
           const mockImages = [
             'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=800&q=80',
             'https://images.unsplash.com/photo-1572248522899-40d874feb91c?auto=format&fit=crop&w=800&q=80',
@@ -75,7 +80,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
       id: `bb-custom-${Math.floor(100 + Math.random() * 900)}`,
       price: parseInt(formData.price),
       dailyTraffic: parseInt(formData.dailyTraffic),
-      availability: 'Pending Approval', // Status is initially pending
+      availability: 'Pending Approval',
       visibilityScore: Math.floor(82 + Math.random() * 16),
       reviews: 0,
       bookingCount: 0,
@@ -109,7 +114,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* 1. Host Dashboard Financial Stats */}
       <div style={{
@@ -123,7 +128,8 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           border: '1px solid var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'var(--bg-glass)'
         }}>
           <div>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>TOTAL OWNED SITES</p>
@@ -134,7 +140,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
             width: '50px',
             height: '50px',
             borderRadius: '12px',
-            background: 'rgba(124, 58, 237, 0.1)',
+            background: 'rgba(99, 102, 241, 0.1)',
             color: 'var(--accent-purple)',
             display: 'flex',
             alignItems: 'center',
@@ -150,7 +156,8 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           border: '1px solid var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'var(--bg-glass)'
         }}>
           <div>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>ACTIVE RENTALS</p>
@@ -163,7 +170,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
             width: '50px',
             height: '50px',
             borderRadius: '12px',
-            background: 'rgba(6, 182, 212, 0.1)',
+            background: 'rgba(59, 130, 246, 0.1)',
             color: 'var(--accent-cyan)',
             display: 'flex',
             alignItems: 'center',
@@ -179,12 +186,13 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           border: '1px solid var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'var(--bg-glass)'
         }}>
           <div>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>GROSS MONTHLY RENT</p>
             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginTop: '6px', color: 'var(--accent-emerald)' }}>₹{monthlyRevenue.toLocaleString()}</h3>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px' }}>AdVantage Commission (12%): ₹{platformCommission.toLocaleString()}</p>
+            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px' }}>AdNazar Commission (12%): ₹{platformCommission.toLocaleString()}</p>
           </div>
           <div style={{
             width: '50px',
@@ -206,17 +214,24 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           border: '1px solid var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'var(--bg-glass)'
         }}>
           <div>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>NET PAYOUT COMPLETED</p>
-            <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginTop: '6px' }}>₹{netEarnings.toLocaleString()}</h3>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>NET PAYOUT AVAILABLE</p>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginTop: '6px', color: 'var(--accent-saffron)' }}>₹{netEarnings.toLocaleString()}</h3>
             <button
-              onClick={() => alert(`Initiating direct NEFT/IMPS payout of ₹${netEarnings.toLocaleString()} to HDFC Bank A/c •••• 5690.`)}
+              onClick={() => {
+                if (!bankLinked) {
+                  setShowBankSetup(true);
+                } else {
+                  alert(`Direct NEFT transfer of ₹${netEarnings.toLocaleString()} initiated to bank account linked with IFSC code: ${ifscCode}. Status: Processing...`);
+                }
+              }}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: 'var(--accent-purple)',
+                color: 'var(--accent-saffron)',
                 fontSize: '0.65rem',
                 fontWeight: '700',
                 textDecoration: 'underline',
@@ -227,22 +242,92 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 marginTop: '4px'
               }}
             >
-              <Landmark style={{ width: '10px', height: '10px' }} /> Request Instant Withdrawal
+              <Landmark style={{ width: '10px', height: '10px' }} /> {bankLinked ? 'Request Direct NEFT Payout' : 'Link Payout Bank Account First'}
             </button>
           </div>
           <div style={{
             width: '50px',
             height: '50px',
             borderRadius: '12px',
-            background: 'rgba(15, 23, 42, 0.03)',
+            background: 'rgba(249, 115, 22, 0.1)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            color: 'var(--accent-saffron)'
           }}>
-            <Landmark style={{ width: '24px', height: '24px', color: 'var(--text-secondary)' }} />
+            <Landmark style={{ width: '24px', height: '24px' }} />
           </div>
         </div>
       </div>
+
+      {/* Bank Account Linking Setup Panel */}
+      {showBankSetup && (
+        <div className="glass-panel" style={{
+          padding: '24px',
+          border: '1px solid var(--accent-saffron)',
+          background: 'rgba(249, 115, 22, 0.03)'
+        }}>
+          <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-saffron)' }}>
+            <Landmark style={{ width: '18px', height: '18px' }} /> Indian Banking Settlement Setup
+          </h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            AdNazar settles payouts directly through IMPS/NEFT transfers. Provide your details below.
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+            marginTop: '16px'
+          }}>
+            <div>
+              <span className="label-text">IFSC CODE</span>
+              <input
+                type="text"
+                className="input-field"
+                value={ifscCode}
+                onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                placeholder="e.g. HDFC0001234"
+              />
+            </div>
+            <div>
+              <span className="label-text">SETTLEMENT UPI ID</span>
+              <input
+                type="text"
+                className="input-field"
+                value={upiHandle}
+                onChange={(e) => setUpiHandle(e.target.value)}
+                placeholder="e.g. name@okaxis"
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => setShowBankSetup(false)}
+              className="btn-outline"
+              style={{ padding: '8px 16px', fontSize: '0.8rem' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (ifscCode.length < 11 || !upiHandle.includes('@')) {
+                  alert('Please enter a valid 11-digit IFSC code and UPI ID.');
+                  return;
+                }
+                setBankLinked(true);
+                setShowBankSetup(false);
+                alert('Settlement Bank Account successfully linked with AdNazar Node!');
+              }}
+              className="btn-neon-saffron"
+              style={{ padding: '8px 20px', fontSize: '0.8rem' }}
+            >
+              Verify & Link Account
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Headline and List Billboard additions trigger */}
       <div style={{
@@ -253,9 +338,9 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
         gap: '16px'
       }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-mono)' }}>Hoarding Site Listings</h2>
+          <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-mono)' }}>Your Hoarding Spots</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            List, update pricing calendars, and register billboard slots inside the Marketplace system.
+            List, update pricing structures, and manage your outdoor hoarding rentals across major Indian cities.
           </p>
         </div>
 
@@ -273,9 +358,9 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
       {showAddForm && (
         <div className="glass-panel" style={{
           padding: '28px',
-          border: '1px solid rgba(124, 58, 237, 0.15)',
-          background: '#ffffff',
-          boxShadow: '0 10px 40px rgba(15, 23, 42, 0.08)',
+          border: '1px solid var(--border-glass)',
+          background: 'var(--bg-secondary)',
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.4)',
           position: 'relative'
         }}>
           {showSuccess && (
@@ -285,7 +370,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
               left: 0,
               right: 0,
               bottom: 0,
-              background: '#ffffff',
+              background: 'var(--bg-secondary)',
               borderRadius: '16px',
               zIndex: 100,
               display: 'flex',
@@ -321,8 +406,8 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           )}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px' }}>
-              🛠️ Hoarding Specification Form
+            <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px', color: 'var(--text-primary)' }}>
+              🛠️ Hoarding Specification Details
             </h3>
 
             {/* specification Grid */}
@@ -351,10 +436,10 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                   className="input-field"
                   value={formData.city}
                   onChange={handleChange}
-                  style={{ appearance: 'none', background: 'var(--bg-secondary) url("data:image/svg+xml;utf8,<svg fill=\'%23475569\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat 95% center' }}
+                  style={{ appearance: 'none', background: 'var(--bg-secondary) url("data:image/svg+xml;utf8,<svg fill=\'%2394a3b8\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat 95% center' }}
                 >
-                  {['Ahmedabad', 'Mumbai', 'Delhi-NCR', 'Bangalore', 'Pune', 'Hyderabad'].map(c => (
-                    <option key={c} value={c} style={{ background: '#ffffff', color: 'var(--text-primary)' }}>{c}</option>
+                  {['Ahmedabad', 'Mumbai', 'Delhi-NCR', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata'].map(c => (
+                    <option key={c} value={c} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{c}</option>
                   ))}
                 </select>
               </div>
@@ -418,10 +503,10 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                   className="input-field"
                   value={formData.areaType}
                   onChange={handleChange}
-                  style={{ appearance: 'none', background: 'var(--bg-secondary) url("data:image/svg+xml;utf8,<svg fill=\'%23475569\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat 95% center' }}
+                  style={{ appearance: 'none', background: 'var(--bg-secondary) url("data:image/svg+xml;utf8,<svg fill=\'%2394a3b8\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat 95% center' }}
                 >
                   {['Highway', 'Market Area', 'IT Park / Commercial', 'School / College Area', 'Residential'].map(a => (
-                    <option key={a} value={a} style={{ background: '#ffffff', color: 'var(--text-primary)' }}>{a}</option>
+                    <option key={a} value={a} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{a}</option>
                   ))}
                 </select>
               </div>
@@ -460,7 +545,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 display: 'flex',
                 gap: '16px',
                 alignItems: 'center',
-                background: 'rgba(15, 23, 42, 0.03)',
+                background: 'rgba(255, 255, 255, 0.02)',
                 padding: '16px',
                 borderRadius: '10px',
                 border: '1px solid var(--border-glass)'
@@ -482,7 +567,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                       <span>Progress</span>
                       <span>{uploadProgress}%</span>
                     </div>
-                    <div style={{ width: '100%', height: '6px', background: 'rgba(15,23,42,0.05)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '999px', overflow: 'hidden' }}>
                       <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--accent-purple)', borderRadius: '999px' }} />
                     </div>
                   </div>
@@ -491,7 +576,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                     <img
                       src={formData.image}
                       alt="Uploaded frame preview"
-                      style={{ width: '80px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(15,23,42,0.1)' }}
+                      style={{ width: '80px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}
                     />
                     <span style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>✓ Ready (Standard Mock Loaded)</span>
                   </div>
@@ -512,7 +597,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 type="submit"
                 className="btn-neon-purple"
               >
-                Submit Billboard for Admin Review
+                Submit Billboard for Verification
               </button>
             </div>
           </form>
@@ -522,21 +607,21 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
       {/* 4. Active Sites Table & Cards List */}
       <div className="glass-panel" style={{
         padding: '24px',
-        border: '1px solid var(--border-glass)'
+        border: '1px solid var(--border-glass)',
+        background: 'var(--bg-glass)'
       }}>
-        <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px', marginBottom: '16px' }}>
-          Site Portfolio & Operational Ratios
+        <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px', marginBottom: '16px', color: 'var(--text-primary)' }}>
+          Site Portfolio & Operational Status
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
           {billboards.map((board) => {
-            const isApproved = board.availability !== 'Pending Approval';
             return (
               <div
                 key={board.id}
                 className="glass-panel-hover"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.55)',
+                  background: 'rgba(23, 21, 43, 0.4)',
                   border: '1px solid var(--border-glass)',
                   borderRadius: '12px',
                   padding: '16px',
@@ -561,7 +646,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 {/* Details */}
                 <div>
                   <p style={{ fontSize: '0.7rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>📍 {board.city.toUpperCase()}</p>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginTop: '2px' }}>{board.title}</h4>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginTop: '2px', color: 'var(--text-primary)' }}>{board.title}</h4>
                   <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{board.location}</p>
                 </div>
 
@@ -571,12 +656,12 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                   gridTemplateColumns: '1fr 1fr',
                   gap: '8px',
                   fontSize: '0.75rem',
-                  borderTop: '1px solid rgba(15, 23, 42, 0.05)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
                   paddingTop: '8px'
                 }}>
                   <div>
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>SIZE</span>
-                    <p style={{ fontWeight: '600' }}>{board.size}</p>
+                    <p style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{board.size}</p>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>MONTHLY RATE</span>
@@ -584,7 +669,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>DAILY TRAFFIC</span>
-                    <p style={{ fontWeight: '600' }}>{board.dailyTraffic.toLocaleString()}</p>
+                    <p style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{board.dailyTraffic.toLocaleString()}</p>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>VISIBILITY</span>
@@ -595,14 +680,19 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 {/* Action button */}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                   <button
-                    onClick={() => alert(`Operational details for ${board.title} (Daily occupancy log sheet, mounting check, structures status: Good).`)}
+                    onClick={() => alert(`Operational details for ${board.title} (Daily occupancy logs verified, structure status: Fit).`)}
                     className="btn-outline"
                     style={{ flex: 1, padding: '6px 12px', fontSize: '0.7rem', justifyContent: 'center' }}
                   >
                     View Logs
                   </button>
                   <button
-                    onClick={() => alert(`Modify pricing calendars/terms for ${board.title}. Current monthly price is ₹${board.price.toLocaleString()}.`)}
+                    onClick={() => {
+                      const newPrice = prompt(`Enter new monthly rental price (INR ₹) for ${board.title}:`, board.price);
+                      if (newPrice && !isNaN(newPrice)) {
+                        alert(`Pricing updated to ₹${parseInt(newPrice).toLocaleString()}/month. Pending sync.`);
+                      }
+                    }}
                     className="btn-outline"
                     style={{ flex: 1, padding: '6px 12px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}
                   >

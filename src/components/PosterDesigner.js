@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { POSTER_TEMPLATES } from '@/utils/mockData';
+import { POSTER_TEMPLATES, AI_SLOGAN_SUGGESTIONS } from '@/utils/mockData';
 import { Type, Image as ImageIcon, Sparkles, Sliders, Layout, Upload, Palette } from 'lucide-react';
 
 export default function PosterDesigner({ canvasRef, onPosterChange }) {
@@ -16,11 +16,90 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
   const [textColor, setTextColor] = useState(POSTER_TEMPLATES[0].textColor);
   const [sticker, setSticker] = useState(POSTER_TEMPLATES[0].sticker);
   const [stickerSize, setStickerSize] = useState(80);
-  
+  const [stickerX, setStickerX] = useState(300);
+  const [stickerY, setStickerY] = useState(245);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [isOverSticker, setIsOverSticker] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadedImageObj, setUploadedImageObj] = useState(null);
   const [useUpload, setUseUpload] = useState(false);
   const fileInputRef = useRef(null);
+
+  const isPointOverSticker = (x, y) => {
+    if (!sticker) return false;
+    const halfSize = stickerSize / 2;
+    const minX = stickerX - halfSize;
+    const maxX = stickerX + halfSize;
+    const minY = stickerY - stickerSize;
+    const maxY = stickerY + 10;
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
+  };
+
+  const getCanvasCoords = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const isTouch = e.touches && e.touches.length > 0;
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+    
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
+  const handleMouseDown = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const coords = getCanvasCoords(e, canvas);
+    
+    if (isPointOverSticker(coords.x, coords.y)) {
+      setIsDragging(true);
+      setDragOffset({
+        x: coords.x - stickerX,
+        y: coords.y - stickerY
+      });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const coords = getCanvasCoords(e, canvas);
+    
+    setIsOverSticker(isPointOverSticker(coords.x, coords.y));
+    
+    if (isDragging) {
+      const newX = Math.max(20, Math.min(canvas.width - 20, coords.x - dragOffset.x));
+      const newY = Math.max(20, Math.min(canvas.height - 20, coords.y - dragOffset.y));
+      setStickerX(newX);
+      setStickerY(newY);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e) => {
+    handleMouseDown(e);
+  };
+
+  const handleTouchMove = (e) => {
+    if (isDragging) {
+      e.preventDefault();
+    }
+    handleMouseMove(e);
+  };
+
+  const handleTouchEnd = () => {
+    handleMouseUp();
+  };
 
   // Load a template
   const applyTemplate = (tpl) => {
@@ -33,7 +112,21 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     setAccentColor(tpl.accentColor);
     setTextColor(tpl.textColor);
     setSticker(tpl.sticker);
+    setStickerX(300);
+    setStickerY(245);
     setUseUpload(false);
+  };
+
+  // Auto AI slogan generation
+  const applyAISlogan = (slogan) => {
+    setTitle(slogan.headline);
+    setSubtitle(slogan.sub);
+    setTagline(slogan.tag);
+  };
+
+  const handleRandomAISlogan = () => {
+    const randomIndex = Math.floor(Math.random() * AI_SLOGAN_SUGGESTIONS.length);
+    applyAISlogan(AI_SLOGAN_SUGGESTIONS[randomIndex]);
   };
 
   // Handle image upload
@@ -127,7 +220,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.fillText(subtitle.toUpperCase(), width / 2, 70);
 
       // Main Slogan (Title)
-      ctx.font = '900 52px "Space Grotesk", sans-serif';
+      ctx.font = '900 48px "Space Grotesk", sans-serif';
       ctx.fillStyle = textColor;
       ctx.textAlign = 'center';
       // Shadow glow effect
@@ -135,7 +228,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.shadowBlur = 6;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 3;
-      ctx.fillText(title.toUpperCase(), width / 2 + 10, height / 2 - 5);
+      ctx.fillText(title.toUpperCase(), width / 2, height / 2 - 5);
       
       // Reset Shadow for next items
       ctx.shadowColor = 'transparent';
@@ -144,14 +237,14 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.shadowOffsetY = 0;
 
       // Tagline details
-      ctx.font = 'italic 18px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'italic 16px "Plus Jakarta Sans", sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
       ctx.fillText(tagline, width / 2, height / 2 + 50);
 
       // Sticker drawing
       if (sticker) {
         ctx.font = `${stickerSize}px Arial`;
-        ctx.fillText(sticker, width / 2, height - 55);
+        ctx.fillText(sticker, stickerX, stickerY);
       }
     }
 
@@ -166,7 +259,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     }
   }, [
     title, subtitle, tagline, bgStart, bgEnd, accentColor,
-    textColor, sticker, stickerSize, useUpload, uploadedImageObj, canvasRef
+    textColor, sticker, stickerSize, stickerX, stickerY, useUpload, uploadedImageObj, canvasRef
   ]);
 
   return (
@@ -177,13 +270,35 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       flexDirection: 'column',
       gap: '24px'
     }}>
-      <div>
-        <h2 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Palette style={{ color: 'var(--accent-purple)' }} /> Ad Poster Builder
-        </h2>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          Design a dynamic, high-impact Canva-style ad campaign or upload a flyer in seconds.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Palette style={{ color: 'var(--accent-purple)' }} /> Ad Poster Builder
+          </h2>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            Design a high-impact ad campaign or upload a flyer in seconds.
+          </p>
+        </div>
+
+        {/* AI Suggestions Trigger */}
+        {!useUpload && (
+          <button
+            onClick={handleRandomAISlogan}
+            className="btn-outline"
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.75rem',
+              borderColor: 'var(--accent-saffron)',
+              color: 'var(--accent-saffron)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(249, 115, 22, 0.05)'
+            }}
+          >
+            <Sparkles style={{ width: '12px', height: '12px' }} /> AI Slogan Magic
+          </button>
+        )}
       </div>
 
       {/* Mode Switches */}
@@ -244,17 +359,82 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
         </button>
       </div>
 
-      {/* hidden canvas rendering in a 2:1 billboard aspect ratio */}
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={300}
-        style={{ display: 'none' }}
-      />
+      {/* Interactive Poster Canvas Viewport */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Type style={{ width: '12px', height: '12px', color: 'var(--accent-purple)' }} /> Interactive Canvas Preview
+          </span>
+          {sticker && <span style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>ℹ️ Drag & drop sticker to position</span>}
+        </div>
+        
+        <canvas
+          ref={canvasRef}
+          width={600}
+          height={300}
+          style={{
+            width: '100%',
+            maxWidth: '600px',
+            height: 'auto',
+            aspectRatio: '2/1',
+            border: isDragging ? '2px solid var(--accent-purple)' : '1px solid var(--border-glass)',
+            borderRadius: '12px',
+            background: 'var(--bg-primary)',
+            cursor: isDragging ? 'grabbing' : (isOverSticker ? 'grab' : 'default'),
+            display: 'block',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            touchAction: 'none',
+            transition: 'border-color 0.15s ease'
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        />
+      </div>
 
       {/* Studio Options */}
       {!useUpload ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* AI Quick Slogan List */}
+          <div>
+            <span className="label-text" style={{ fontSize: '0.75rem', color: 'var(--accent-saffron)' }}>
+              🪄 Localized Campaign Ideas (AI Suggested)
+            </span>
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              paddingBottom: '6px',
+              marginTop: '4px'
+            }}>
+              {AI_SLOGAN_SUGGESTIONS.map((sl, index) => (
+                <button
+                  key={index}
+                  onClick={() => applyAISlogan(sl)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-glass)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.7rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'var(--transition-smooth)'
+                  }}
+                  className="btn-outline-hover"
+                >
+                  ✨ {sl.category}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Template Selector */}
           <div>
             <span className="label-text" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -273,7 +453,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
                   style={{
                     padding: '8px 10px',
                     borderRadius: '8px',
-                    background: selectedTemplate.id === tpl.id ? 'rgba(124, 58, 237, 0.2)' : 'rgba(255,255,255,0.03)',
+                    background: selectedTemplate.id === tpl.id ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255,255,255,0.03)',
                     border: selectedTemplate.id === tpl.id ? '1px solid var(--accent-purple)' : '1px solid var(--border-glass)',
                     color: selectedTemplate.id === tpl.id ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontSize: '0.75rem',
@@ -298,7 +478,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
                 className="input-field"
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
-                maxLength={40}
+                maxLength={45}
               />
             </div>
             <div>
@@ -318,7 +498,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
                 className="input-field"
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
-                maxLength={60}
+                maxLength={65}
               />
             </div>
           </div>
@@ -415,7 +595,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
                     width: '40px',
                     height: '40px',
                     borderRadius: '8px',
-                    background: sticker === stk ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.03)',
+                    background: sticker === stk ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
                     border: sticker === stk ? '1px solid var(--accent-purple)' : '1px solid var(--border-glass)',
                     fontSize: '1.2rem',
                     cursor: 'pointer',
@@ -473,7 +653,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
             width: '60px',
             height: '60px',
             borderRadius: '50%',
-            background: 'rgba(124, 58, 237, 0.1)',
+            background: 'rgba(99, 102, 241, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -558,7 +738,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
           boxShadow: '0 0 8px var(--accent-emerald)'
         }} />
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          Poster outputs synced automatically with our 3D canvas render.
+          Poster outputs synced automatically with our Three.js 3D screen.
         </span>
       </div>
     </div>

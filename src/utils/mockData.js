@@ -19,7 +19,8 @@ export const INITIAL_BILLBOARDS = [
     image: 'https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&w=800&q=80',
     description: 'Ultra-bright LED screen on the busiest commercial highway in Gujarat. Outstanding visibility for retail, automobiles, and real estate.',
     reviews: 14,
-    bookingCount: 42
+    bookingCount: 42,
+    roiFactor: 1.4
   },
   {
     id: 'bb-02',
@@ -39,9 +40,10 @@ export const INITIAL_BILLBOARDS = [
     ownerName: 'Vanguard Media Group',
     ownerContact: '+91 99999 88888',
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    description: 'Stunning billboard visible from all Juhu Circle exit points. Premium positioning targetting elite spenders and tourists visiting the beach.',
+    description: 'Stunning billboard visible from all Juhu Circle exit points. Premium positioning targeting elite spenders and tourists visiting the beach.',
     reviews: 29,
-    bookingCount: 88
+    bookingCount: 88,
+    roiFactor: 1.8
   },
   {
     id: 'bb-03',
@@ -63,7 +65,8 @@ export const INITIAL_BILLBOARDS = [
     image: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=800&q=80',
     description: 'Giant hoarding positioned directly at the entrance of Gurgaon Cyber City. Ideal for B2B, premium gadgets, lifestyle brands, and banking.',
     reviews: 21,
-    bookingCount: 56
+    bookingCount: 56,
+    roiFactor: 1.6
   },
   {
     id: 'bb-04',
@@ -86,7 +89,8 @@ export const INITIAL_BILLBOARDS = [
     image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80',
     description: 'Perfect commercial location with long visual distance along the bustling foodie road. Heavy pedestrian and two-wheeler traffic.',
     reviews: 8,
-    bookingCount: 31
+    bookingCount: 31,
+    roiFactor: 1.3
   },
   {
     id: 'bb-05',
@@ -108,7 +112,8 @@ export const INITIAL_BILLBOARDS = [
     image: 'https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?auto=format&fit=crop&w=800&q=80',
     description: 'High frequency youth exposure billboard directly facing the primary hangouts on FC Road. Unbeatable for food chains, test preps, and clothing.',
     reviews: 12,
-    bookingCount: 25
+    bookingCount: 25,
+    roiFactor: 1.1
   },
   {
     id: 'bb-06',
@@ -130,62 +135,142 @@ export const INITIAL_BILLBOARDS = [
     image: 'https://images.unsplash.com/photo-1572248522899-40d874feb91c?auto=format&fit=crop&w=800&q=80',
     description: 'Gigantic digital display screen targeting fast-moving traffic entering Hyderabad\'s high-tech IT corridor. Highly modern, vibrant LED.',
     reviews: 19,
-    bookingCount: 67
+    bookingCount: 67,
+    roiFactor: 1.5
+  },
+  {
+    id: 'bb-07',
+    title: 'OMR Tech Corridor Overpass',
+    city: 'Chennai',
+    location: 'OMR Road near Sholinganallur Junction',
+    lat: 12.9010,
+    lng: 80.2279,
+    size: '35x15 ft',
+    price: 110000,
+    availability: 'Available',
+    visibilityScore: 93,
+    dailyTraffic: 130000,
+    areaType: 'IT Park / Commercial',
+    audienceType: 'Software Engineers & Suburban Commuters',
+    bestTiming: '08:00 AM - 10:00 PM',
+    ownerName: 'Coromandel Media Hub',
+    ownerContact: '+91 94440 12345',
+    image: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=800&q=80',
+    description: 'Vibrant hoarding positioned along Chennai\'s premium IT corridor. Great exposure for software recruiting, fintech, and residential developments.',
+    reviews: 11,
+    bookingCount: 22,
+    roiFactor: 1.45
+  },
+  {
+    id: 'bb-08',
+    title: 'Park Street Elite Digital Billboard',
+    city: 'Kolkata',
+    location: 'Park Street Crossing near Allen Park',
+    lat: 22.5487,
+    lng: 88.3524,
+    size: '30x20 ft',
+    price: 140000,
+    availability: 'Available',
+    visibilityScore: 97,
+    dailyTraffic: 150000,
+    areaType: 'Market Area',
+    audienceType: 'Shoppers, Food Lovers & Club Goers',
+    bestTiming: '04:00 PM - Midnight',
+    ownerName: 'East Bengal Advertising',
+    ownerContact: '+91 98300 54321',
+    image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80',
+    description: 'Iconic location in the heart of Kolkata\'s most legendary lifestyle, dining, and shopping hub. Extreme dwell time during evenings and festival seasons.',
+    reviews: 25,
+    bookingCount: 71,
+    roiFactor: 1.7
   }
 ];
 
 export const POSTER_TEMPLATES = [
   {
     id: 'tpl-1',
-    name: 'Festival Special (Diwali)',
+    name: 'Festival (Diwali Dhamaka)',
     category: 'Festive',
     bgStart: '#7c2d12',
     bgEnd: '#450a0a',
-    titleText: 'HAPPY DIWALI',
-    subtitleText: 'FLAT 50% OFF ON ALL ITEMS',
+    titleText: 'SHUBH DIWALI',
+    subtitleText: 'FESTIVE SALE • FLAT 50% OFF',
     accentColor: '#fbbf24',
     textColor: '#ffffff',
-    tagline: 'Light up your home with premium collections!',
+    tagline: 'Ghar ko sajao premium designs se!',
     sticker: '🪔'
   },
   {
     id: 'tpl-2',
-    name: 'Grand Store Opening',
+    name: 'Grand Launch (Dhoom Machale)',
     category: 'Launch',
     bgStart: '#1e1b4b',
     bgEnd: '#311042',
-    titleText: 'GRAND LAUNCH',
+    titleText: 'BADA DHAMAKA',
     subtitleText: 'WE ARE NOW OPEN IN YOUR CITY',
     accentColor: '#22d3ee',
     textColor: '#ffffff',
-    tagline: 'Visit today for exclusive opening gifts!',
+    tagline: 'Aaj hi aao aur opening gifts pao! ✨',
     sticker: '✨'
   },
   {
     id: 'tpl-3',
-    name: 'Election / Political Campaign',
-    category: 'Political',
+    name: 'National Pride (Desh Ki Shaan)',
+    category: 'National',
     bgStart: '#ea580c',
     bgEnd: '#1e3a8a',
-    titleText: 'VOTE FOR PROGRESS',
+    titleText: 'MAKE IN INDIA',
     subtitleText: 'LEADERSHIP WITH INTEGRITY',
     accentColor: '#ffffff',
     textColor: '#ffffff',
-    tagline: 'Building a better future together. Choose Progress.',
+    tagline: 'Supporting Local Merchants and Innovation.',
     sticker: '🇮🇳'
   },
   {
     id: 'tpl-4',
-    name: 'Mega Clearance Sale',
+    name: 'Food Campaign (Desi Swaad)',
     category: 'Sales',
-    bgStart: '#be123c',
-    bgEnd: '#4c0519',
-    titleText: 'MEGA SALE',
-    subtitleText: 'LIMITED PERIOD OFFER',
+    bgStart: '#b91c1c',
+    bgEnd: '#781010',
+    titleText: 'ASLI MASALA',
+    subtitleText: 'GARAM & MASALEDAR CURRY',
     accentColor: '#facc15',
     textColor: '#ffffff',
-    tagline: 'Shop online & in-stores before stocks run out!',
-    sticker: '🔥'
+    tagline: 'Swaad aisa jo bhulaya na jaaye!',
+    sticker: '🍕'
+  }
+];
+
+export const AI_SLOGAN_SUGGESTIONS = [
+  {
+    category: 'Festive',
+    headline: 'FESTIVE DHAMAKA',
+    sub: 'CELEBRATE THE SEASON OF JOY',
+    tag: 'Get up to 60% off. Special Indian heritage collection.'
+  },
+  {
+    category: 'Launch',
+    headline: 'AB APNE SHAHAR MEIN',
+    sub: 'GRAND STORE LAUNCHING TODAY',
+    tag: 'Visit near metro station. Free gifts for first 500 customers!'
+  },
+  {
+    category: 'Real Estate',
+    headline: 'APNA GHAR, APNA SWARG',
+    sub: 'PREMIUM 2 & 3 BHK APARTMENTS',
+    tag: 'Book with just 1 Lakh. No pre-EMI till possession.'
+  },
+  {
+    category: 'Food',
+    headline: 'DESI KADHAI KHANA',
+    sub: 'TANTALIZING SPICES & SIZZLERS',
+    tag: 'Order online via Zomato/Swiggy. Get 1+1 Free on Weekends.'
+  },
+  {
+    category: 'General',
+    headline: 'SABSE SASTA, SABSE ACCHA',
+    sub: 'INDIA\'S FAVORITE BRAND',
+    tag: 'Join millions of happy customers across 28 states.'
   }
 ];
 

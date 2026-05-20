@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Map, Navigation, Eye, TrendingUp, Filter, Heart, ChevronRight, Layers } from 'lucide-react';
 
-export default function MapView({ billboards, activeBillboard, setActiveBillboard, onSelectCity }) {
+export default function MapView({ billboards, activeBillboard, setActiveBillboard, onSelectCity, theme }) {
   const [selectedCity, setSelectedCity] = useState('All');
   const [showTrafficLayer, setShowTrafficLayer] = useState(true);
   const [showVisibilityLayer, setShowVisibilityLayer] = useState(true);
@@ -108,8 +108,8 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
               style={{
                 padding: '6px 14px',
                 borderRadius: '9999px',
-                background: selectedCity === city ? 'linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-cyan) 100%)' : 'rgba(15,23,42,0.05)',
-                border: 'none',
+                background: selectedCity === city ? 'linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-cyan) 100%)' : 'var(--bg-tertiary)',
+                border: '1px solid var(--border-glass)',
                 color: selectedCity === city ? '#fff' : 'var(--text-secondary)',
                 fontSize: '0.75rem',
                 fontFamily: 'var(--font-mono)',
@@ -129,18 +129,18 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
           position: 'relative',
           width: '100%',
           height: '420px',
-          background: 'radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%)',
-          border: '1px solid rgba(15, 23, 42, 0.08)',
+          background: theme === 'dark' ? 'radial-gradient(circle, #0e0c15 0%, #06050b 100%)' : 'radial-gradient(circle, #f8fafc 0%, #e2e8f0 100%)',
+          border: '1px solid var(--border-glass)',
           borderRadius: '12px',
           overflow: 'hidden',
-          boxShadow: 'inset 0 0 40px rgba(15, 23, 42, 0.06)'
+          boxShadow: theme === 'dark' ? 'inset 0 0 40px rgba(0, 0, 0, 0.6)' : 'inset 0 0 40px rgba(15, 23, 42, 0.06)'
         }}>
           {/* Neon Grid Lines overlay */}
           <div style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px)',
+            backgroundImage: theme === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)' : 'linear-gradient(rgba(9, 9, 11, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(9, 9, 11, 0.03) 1px, transparent 1px)',
             backgroundSize: '30px 30px',
             pointerEvents: 'none'
           }} />
@@ -152,7 +152,7 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
             left: '12px',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.65rem',
-            color: 'rgba(15, 23, 42, 0.4)',
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(15, 23, 42, 0.4)',
             pointerEvents: 'none'
           }}>
             SYS.GRID: IN-WEST_ZONE // LAT 20.5937° N, LNG 78.9629° E
@@ -294,8 +294,8 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
                   width: '18px',
                   height: '18px',
                   borderRadius: '50%',
-                  backgroundColor: isAvailable ? 'var(--accent-emerald)' : 'rgba(244, 63, 94, 0.7)',
-                  border: '3px solid #ffffff',
+                  backgroundColor: isAvailable ? 'var(--accent-emerald)' : 'var(--accent-rose)',
+                  border: theme === 'dark' ? '3px solid #18181b' : '3px solid #ffffff',
                   boxShadow: isActive 
                     ? `0 0 15px ${isAvailable ? 'var(--accent-emerald)' : 'var(--accent-rose)'}` 
                     : 'none',
@@ -321,11 +321,11 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
                   fontSize: '0.65rem',
                   color: isActive ? 'var(--accent-cyan)' : 'var(--text-primary)',
                   border: isActive ? '1px solid var(--accent-cyan)' : '1px solid var(--border-glass)',
-                  background: isActive ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255, 255, 255, 0.9)',
+                  background: isActive ? 'var(--accent-cyan-glow)' : 'var(--bg-secondary)',
                   marginTop: '4px',
                   whiteSpace: 'nowrap',
                   fontFamily: 'var(--font-mono)',
-                  boxShadow: '0 4px 10px rgba(15,23,42,0.06)',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
                   transition: 'var(--transition-smooth)'
                 }}>
                   {board.city} - {board.price >= 100000 ? `₹${(board.price / 100000).toFixed(1)}L` : `₹${board.price / 1000}K`}
@@ -340,7 +340,7 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{
           padding: '16px 20px',
-          background: 'rgba(255,255,255,0.02)',
+          background: 'var(--bg-glass)',
           borderRadius: '12px',
           border: '1px solid var(--border-glass)'
         }}>
@@ -355,12 +355,12 @@ export default function MapView({ billboards, activeBillboard, setActiveBillboar
         {activeBillboard ? (
           <div className="glass-panel" style={{
             padding: '20px',
-            border: '1px solid rgba(15,23,42,0.08)',
+            border: '1px solid var(--border-glass)',
             borderRadius: '12px',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
-            background: 'rgba(255, 255, 255, 0.65)',
+            background: 'var(--bg-glass)',
             height: '100%'
           }}>
             {/* Visual Thumbnail */}

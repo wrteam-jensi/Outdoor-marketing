@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AdvertiserPortal from '@/components/AdvertiserPortal';
@@ -13,6 +13,19 @@ export default function Home() {
   const [activePortal, setActivePortal] = useState('advertiser');
   const [billboards, setBillboards] = useState(INITIAL_BILLBOARDS);
   
+  // Theme state
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Security Authentication states
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showAdminAuth, setShowAdminAuth] = useState(false);
@@ -47,14 +60,14 @@ export default function Home() {
   // Seed initial ledger bookings so admin starts with beautiful stats
   const [bookings, setBookings] = useState([
     {
-      id: 'ADV-592031',
+      id: 'ADN-592031',
       boardTitle: 'Cyber Hub Entrance Mega Board',
       city: 'Delhi-NCR',
       totalPaid: 213388, // rental + print fee + GST
       status: 'Secured'
     },
     {
-      id: 'ADV-402915',
+      id: 'ADN-402915',
       boardTitle: 'Koramangala 80ft Road Junction',
       city: 'Bangalore',
       totalPaid: 112088,
@@ -114,20 +127,22 @@ export default function Home() {
         setActivePortal={setActivePortal} 
         isAdminUnlocked={isAdminUnlocked}
         onLockToggle={handleLockToggle}
+        theme={theme}
+        onThemeToggle={toggleTheme}
       />
 
       {/* Main Container */}
-      <main style={{ flex: 1, padding: '0 24px', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
+      <main className="animate-fade-in" style={{ flex: 1, padding: '24px', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
         
         {/* Advertiser Portal View */}
         {activePortal === 'advertiser' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             
             {/* Startup Banner Hero Section */}
             <div className="glass-panel" style={{
               padding: '48px 32px',
               border: '1px solid var(--border-glass)',
-              background: 'radial-gradient(circle at 80% 20%, rgba(6,182,212,0.08) 0%, transparent 60%), radial-gradient(circle at 10% 80%, rgba(124,58,237,0.08) 0%, transparent 60%), rgba(255, 255, 255, 0.75)',
+              background: 'radial-gradient(circle at 80% 20%, var(--accent-cyan-glow) 0%, transparent 60%), radial-gradient(circle at 10% 80%, var(--accent-purple-glow) 0%, transparent 60%), var(--bg-glass)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -143,7 +158,7 @@ export default function Home() {
                 left: 0,
                 right: 0,
                 height: '4px',
-                background: 'linear-gradient(90deg, var(--accent-purple) 0%, var(--accent-cyan) 100%)'
+                background: 'linear-gradient(90deg, var(--accent-saffron) 0%, var(--accent-purple) 50%, var(--accent-emerald) 100%)'
               }} />
 
               <span className="badge badge-purple" style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
@@ -155,7 +170,7 @@ export default function Home() {
               </h2>
               
               <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', maxWidth: '650px' }}>
-                Discover premium roadside unipoles, create stunning campaign graphics in our layout studio, and preview them instantly in standard 3D simulated night highways before booking.
+                Discover premium roadside unipoles, generate localized Hinglish/English slogans in our AI builder, and preview campaigns on virtual night highways before booking.
               </p>
 
               {/* Counter details */}
@@ -170,20 +185,20 @@ export default function Home() {
                 paddingTop: '28px'
               }}>
                 <div>
-                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-cyan)' }}>1.2M+</h4>
+                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-cyan)' }}>1.8M+</h4>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>DAILY VEHICLE IMPRESSIONS</p>
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-purple)' }}>100%</h4>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>3D PREVIEW SIMULATION</p>
+                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-purple)' }}>3D WebGL</h4>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>SIMULATED NIGHT HIGHWAYS</p>
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-emerald)' }}>6+ Cities</h4>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>MAJOR METRO DENSITIES</p>
+                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-saffron)' }}>6+ Metros</h4>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>DIWALI/FESTIVE CAMPAIGNS</p>
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800' }}>₹0 Fee</h4>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>LISTINGS REGISTRATION</p>
+                  <h4 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-emerald)' }}>₹0 List</h4>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>ZERO HOST REGISTRATION FEE</p>
                 </div>
               </div>
             </div>
@@ -191,7 +206,9 @@ export default function Home() {
             {/* Main interactive Advertiser application workflows */}
             <AdvertiserPortal
               billboards={billboards}
+              bookings={bookings}
               onBookBillboard={handleBookBillboard}
+              theme={theme}
             />
           </div>
         )}
@@ -224,7 +241,7 @@ export default function Home() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(15, 23, 42, 0.4)',
+          background: 'rgba(7, 6, 15, 0.85)',
           backdropFilter: 'blur(20px)',
           zIndex: 1000,
           display: 'flex',
@@ -232,13 +249,13 @@ export default function Home() {
           justifyContent: 'center',
           padding: '24px'
         }}>
-          <div className="glass-panel animate-fade-in" style={{
+          <div className="glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
             padding: '36px',
-            border: '1px solid rgba(124, 58, 237, 0.2)',
-            background: 'rgba(255, 255, 255, 0.98)',
-            boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.1), var(--shadow-neon-purple)',
+            border: '1px solid var(--border-glass)',
+            background: 'var(--bg-secondary)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -249,13 +266,12 @@ export default function Home() {
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: 'rgba(124, 58, 237, 0.08)',
-              border: '1px solid rgba(124, 58, 237, 0.2)',
+              background: 'rgba(99, 102, 241, 0.1)',
+              border: '1px solid var(--border-glass)',
               color: 'var(--accent-purple)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(124, 58, 237, 0.1)'
+              justifyContent: 'center'
             }}>
               <ShieldAlert style={{ width: '32px', height: '32px' }} />
             </div>
