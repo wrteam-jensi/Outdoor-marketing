@@ -16,11 +16,19 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
   const [textColor, setTextColor] = useState(POSTER_TEMPLATES[0].textColor);
   const [sticker, setSticker] = useState(POSTER_TEMPLATES[0].sticker);
   const [stickerSize, setStickerSize] = useState(80);
+  const [subtitleX, setSubtitleX] = useState(300);
+  const [subtitleY, setSubtitleY] = useState(70);
+  const [titleX, setTitleX] = useState(300);
+  const [titleY, setTitleY] = useState(145);
+  const [taglineX, setTaglineX] = useState(300);
+  const [taglineY, setTaglineY] = useState(200);
   const [stickerX, setStickerX] = useState(300);
   const [stickerY, setStickerY] = useState(245);
+  const [bgImageX, setBgImageX] = useState(0);
+  const [bgImageY, setBgImageY] = useState(0);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [isOverSticker, setIsOverSticker] = useState(false);
+  const [activeDragItem, setActiveDragItem] = useState(null); // 'subtitle', 'title', 'tagline', 'sticker', 'background'
+  const [isOverItem, setIsOverItem] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -28,14 +36,60 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
   const [useUpload, setUseUpload] = useState(false);
   const fileInputRef = useRef(null);
 
-  const isPointOverSticker = (x, y) => {
-    if (!sticker) return false;
-    const halfSize = stickerSize / 2;
-    const minX = stickerX - halfSize;
-    const maxX = stickerX + halfSize;
-    const minY = stickerY - stickerSize;
-    const maxY = stickerY + 10;
-    return x >= minX && x <= maxX && y >= minY && y <= maxY;
+  // Background and overlay image upload states
+  const [uploadedBgImage, setUploadedBgImage] = useState(null);
+  const [uploadedBgImageObj, setUploadedBgImageObj] = useState(null);
+  const [useBgImage, setUseBgImage] = useState(false);
+
+  const [uploadedOverlayImage, setUploadedOverlayImage] = useState(null);
+  const [uploadedOverlayImageObj, setUploadedOverlayImageObj] = useState(null);
+  const [overlayImageX, setOverlayImageX] = useState(150);
+  const [overlayImageY, setOverlayImageY] = useState(150);
+  const [overlayImageSize, setOverlayImageSize] = useState(100);
+  const [overlayImageHeightScale, setOverlayImageHeightScale] = useState(1.0);
+
+  const bgImageInputRef = useRef(null);
+  const overlayImageInputRef = useRef(null);
+
+  const detectHoveredItem = (x, y) => {
+    if (sticker) {
+      const halfSize = stickerSize / 2;
+      if (x >= stickerX - halfSize && x <= stickerX + halfSize && y >= stickerY - stickerSize && y <= stickerY + 10) {
+        return 'sticker';
+      }
+    }
+    if (uploadedOverlayImageObj) {
+      const halfW = overlayImageSize / 2;
+      const halfH = (overlayImageSize * overlayImageHeightScale) / 2;
+      if (x >= overlayImageX - halfW && x <= overlayImageX + halfW && y >= overlayImageY - halfH && y <= overlayImageY + halfH) {
+        return 'overlay';
+      }
+    }
+    if (title && !useUpload) {
+      const approxHalfWidth = (title.length * 24) / 2;
+      if (x >= titleX - approxHalfWidth && x <= titleX + approxHalfWidth && y >= titleY - 48 && y <= titleY + 10) {
+        return 'title';
+      }
+    }
+    if (subtitle && !useUpload) {
+      const approxHalfWidth = (subtitle.length * 9) / 2;
+      if (x >= subtitleX - approxHalfWidth && x <= subtitleX + approxHalfWidth && y >= subtitleY - 18 && y <= subtitleY + 5) {
+        return 'subtitle';
+      }
+    }
+    if (tagline && !useUpload) {
+      const approxHalfWidth = (tagline.length * 8) / 2;
+      if (x >= taglineX - approxHalfWidth && x <= taglineX + approxHalfWidth && y >= taglineY - 16 && y <= taglineY + 5) {
+        return 'tagline';
+      }
+    }
+    if (useUpload && uploadedImageObj) {
+      return 'background';
+    }
+    if (!useUpload && useBgImage && uploadedBgImageObj) {
+      return 'background';
+    }
+    return null;
   };
 
   const getCanvasCoords = (e, canvas) => {
@@ -58,11 +112,22 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     if (!canvas) return;
     const coords = getCanvasCoords(e, canvas);
     
-    if (isPointOverSticker(coords.x, coords.y)) {
-      setIsDragging(true);
+    const item = detectHoveredItem(coords.x, coords.y);
+    if (item) {
+      setActiveDragItem(item);
+      
+      let itemX = 0;
+      let itemY = 0;
+      if (item === 'subtitle') { itemX = subtitleX; itemY = subtitleY; }
+      else if (item === 'title') { itemX = titleX; itemY = titleY; }
+      else if (item === 'tagline') { itemX = taglineX; itemY = taglineY; }
+      else if (item === 'sticker') { itemX = stickerX; itemY = stickerY; }
+      else if (item === 'overlay') { itemX = overlayImageX; itemY = overlayImageY; }
+      else if (item === 'background') { itemX = bgImageX; itemY = bgImageY; }
+      
       setDragOffset({
-        x: coords.x - stickerX,
-        y: coords.y - stickerY
+        x: coords.x - itemX,
+        y: coords.y - itemY
       });
     }
   };
@@ -72,18 +137,37 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     if (!canvas) return;
     const coords = getCanvasCoords(e, canvas);
     
-    setIsOverSticker(isPointOverSticker(coords.x, coords.y));
+    const hoverItem = detectHoveredItem(coords.x, coords.y);
+    setIsOverItem(hoverItem);
     
-    if (isDragging) {
-      const newX = Math.max(20, Math.min(canvas.width - 20, coords.x - dragOffset.x));
-      const newY = Math.max(20, Math.min(canvas.height - 20, coords.y - dragOffset.y));
-      setStickerX(newX);
-      setStickerY(newY);
+    if (activeDragItem) {
+      const deltaX = coords.x - dragOffset.x;
+      const deltaY = coords.y - dragOffset.y;
+      
+      if (activeDragItem === 'subtitle') {
+        setSubtitleX(Math.max(10, Math.min(canvas.width - 10, deltaX)));
+        setSubtitleY(Math.max(15, Math.min(canvas.height - 5, deltaY)));
+      } else if (activeDragItem === 'title') {
+        setTitleX(Math.max(10, Math.min(canvas.width - 10, deltaX)));
+        setTitleY(Math.max(40, Math.min(canvas.height - 10, deltaY)));
+      } else if (activeDragItem === 'tagline') {
+        setTaglineX(Math.max(10, Math.min(canvas.width - 10, deltaX)));
+        setTaglineY(Math.max(15, Math.min(canvas.height - 5, deltaY)));
+      } else if (activeDragItem === 'sticker') {
+        setStickerX(Math.max(10, Math.min(canvas.width - 10, deltaX)));
+        setStickerY(Math.max(20, Math.min(canvas.height - 5, deltaY)));
+      } else if (activeDragItem === 'overlay') {
+        setOverlayImageX(Math.max(10, Math.min(canvas.width - 10, deltaX)));
+        setOverlayImageY(Math.max(10, Math.min(canvas.height - 10, deltaY)));
+      } else if (activeDragItem === 'background') {
+        setBgImageX(deltaX);
+        setBgImageY(deltaY);
+      }
     }
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    setActiveDragItem(null);
   };
 
   const handleTouchStart = (e) => {
@@ -91,7 +175,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
   };
 
   const handleTouchMove = (e) => {
-    if (isDragging) {
+    if (activeDragItem) {
       e.preventDefault();
     }
     handleMouseMove(e);
@@ -112,8 +196,26 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     setAccentColor(tpl.accentColor);
     setTextColor(tpl.textColor);
     setSticker(tpl.sticker);
+    setSubtitleX(300);
+    setSubtitleY(70);
+    setTitleX(300);
+    setTitleY(145);
+    setTaglineX(300);
+    setTaglineY(200);
     setStickerX(300);
     setStickerY(245);
+    setBgImageX(0);
+    setBgImageY(0);
+    
+    setUploadedBgImage(null);
+    setUploadedBgImageObj(null);
+    setUseBgImage(false);
+    setUploadedOverlayImage(null);
+    setUploadedOverlayImageObj(null);
+    setOverlayImageX(150);
+    setOverlayImageY(150);
+    setOverlayImageSize(100);
+    
     setUseUpload(false);
   };
 
@@ -147,6 +249,40 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     reader.readAsDataURL(file);
   };
 
+  const handleBgImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadedBgImage(event.target.result);
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        setUploadedBgImageObj(img);
+        setUseBgImage(true);
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOverlayImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadedOverlayImage(event.target.result);
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        setUploadedOverlayImageObj(img);
+        setOverlayImageHeightScale(img.height / img.width);
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Drawing onto the canvas whenever variables change
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -160,8 +296,8 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     ctx.clearRect(0, 0, width, height);
 
     if (useUpload && uploadedImageObj) {
-      // Draw uploaded custom flyer image resized to fit canvas
-      ctx.drawImage(uploadedImageObj, 0, 0, width, height);
+      // Draw uploaded custom flyer image at pan offsets bgImageX, bgImageY
+      ctx.drawImage(uploadedImageObj, bgImageX, bgImageY, width, height);
       
       // Draw a subtle gloss/shimmer overlay to make it look professional
       const shimmer = ctx.createLinearGradient(0, 0, width, height);
@@ -171,12 +307,17 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.fillStyle = shimmer;
       ctx.fillRect(0, 0, width, height);
     } else {
-      // Draw Gradient Background
-      const grad = ctx.createLinearGradient(0, 0, width, height);
-      grad.addColorStop(0, bgStart);
-      grad.addColorStop(1, bgEnd);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
+      if (useBgImage && uploadedBgImageObj) {
+        // Draw custom background image at bgImageX, bgImageY
+        ctx.drawImage(uploadedBgImageObj, bgImageX, bgImageY, width, height);
+      } else {
+        // Draw Gradient Background
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, bgStart);
+        grad.addColorStop(1, bgEnd);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+      }
 
       // Draw subtle graphic design accents (cyber grid/lines)
       ctx.strokeStyle = 'rgba(255,255,255,0.05)';
@@ -217,7 +358,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.fillStyle = accentColor;
       ctx.textAlign = 'center';
       ctx.letterSpacing = '2px';
-      ctx.fillText(subtitle.toUpperCase(), width / 2, 70);
+      ctx.fillText(subtitle.toUpperCase(), subtitleX, subtitleY);
 
       // Main Slogan (Title)
       ctx.font = '900 48px "Space Grotesk", sans-serif';
@@ -228,7 +369,7 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       ctx.shadowBlur = 6;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 3;
-      ctx.fillText(title.toUpperCase(), width / 2, height / 2 - 5);
+      ctx.fillText(title.toUpperCase(), titleX, titleY);
       
       // Reset Shadow for next items
       ctx.shadowColor = 'transparent';
@@ -239,7 +380,29 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
       // Tagline details
       ctx.font = 'italic 16px "Plus Jakarta Sans", sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(tagline, width / 2, height / 2 + 50);
+      ctx.fillText(tagline, taglineX, taglineY);
+
+      // Sticker drawing
+      // Draw Uploaded Overlay Image/Logo if present
+      if (uploadedOverlayImageObj) {
+        const oWidth = overlayImageSize;
+        const oHeight = overlayImageSize * overlayImageHeightScale;
+        
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.drawImage(
+          uploadedOverlayImageObj,
+          overlayImageX - oWidth / 2,
+          overlayImageY - oHeight / 2,
+          oWidth,
+          oHeight
+        );
+        ctx.restore();
+      }
 
       // Sticker drawing
       if (sticker) {
@@ -259,7 +422,10 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
     }
   }, [
     title, subtitle, tagline, bgStart, bgEnd, accentColor,
-    textColor, sticker, stickerSize, stickerX, stickerY, useUpload, uploadedImageObj, canvasRef
+    textColor, sticker, stickerSize,
+    subtitleX, subtitleY, titleX, titleY, taglineX, taglineY, stickerX, stickerY, bgImageX, bgImageY,
+    useBgImage, uploadedBgImageObj, uploadedOverlayImageObj, overlayImageX, overlayImageY, overlayImageSize, overlayImageHeightScale,
+    useUpload, uploadedImageObj, canvasRef
   ]);
 
   return (
@@ -377,10 +543,10 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
             maxWidth: '600px',
             height: 'auto',
             aspectRatio: '2/1',
-            border: isDragging ? '2px solid var(--accent-purple)' : '1px solid var(--border-glass)',
+            border: activeDragItem ? '2px solid var(--accent-purple)' : '1px solid var(--border-glass)',
             borderRadius: '12px',
             background: 'var(--bg-primary)',
-            cursor: isDragging ? 'grabbing' : (isOverSticker ? 'grab' : 'default'),
+            cursor: activeDragItem ? 'grabbing' : (isOverItem ? 'grab' : 'default'),
             display: 'block',
             boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
             touchAction: 'none',
@@ -626,6 +792,145 @@ export default function PosterDesigner({ canvasRef, onPosterChange }) {
                 />
               </div>
             )}
+          </div>
+
+          {/* Canvas Image Uploads (Background and Logo Overlay) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+            borderTop: '1px solid var(--border-glass)',
+            paddingTop: '20px'
+          }}>
+            {/* Background Image Upload */}
+            <div>
+              <span className="label-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-cyan)' }}>
+                <Upload style={{ width: '12px', height: '12px' }} /> Upload Background Image
+              </span>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Replaces gradient with custom image (pan by dragging).
+              </p>
+              
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => bgImageInputRef.current?.click()}
+                  className="btn-outline"
+                  style={{ padding: '6px 12px', fontSize: '0.75rem', flex: 1 }}
+                >
+                  {uploadedBgImage ? 'Change Image' : 'Select Background'}
+                </button>
+                
+                {uploadedBgImage && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadedBgImage(null);
+                      setUploadedBgImageObj(null);
+                      setUseBgImage(false);
+                    }}
+                    style={{
+                      background: 'rgba(244, 63, 94, 0.1)',
+                      border: '1px solid var(--accent-rose)',
+                      borderRadius: '6px',
+                      color: 'var(--accent-rose)',
+                      padding: '6px 10px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              <input
+                type="file"
+                ref={bgImageInputRef}
+                onChange={handleBgImageUpload}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+
+              {uploadedBgImage && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={useBgImage}
+                    onChange={(e) => setUseBgImage(e.target.checked)}
+                    style={{ accentColor: 'var(--accent-cyan)' }}
+                  />
+                  Use Custom Background
+                </label>
+              )}
+            </div>
+
+            {/* Overlay Image / Logo Upload */}
+            <div>
+              <span className="label-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-purple)' }}>
+                <Upload style={{ width: '12px', height: '12px' }} /> Upload Logo / Overlay
+              </span>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Adds a draggable overlay graphic or badge on top.
+              </p>
+              
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => overlayImageInputRef.current?.click()}
+                  className="btn-outline"
+                  style={{ padding: '6px 12px', fontSize: '0.75rem', flex: 1 }}
+                >
+                  {uploadedOverlayImage ? 'Change Logo' : 'Select Logo/Image'}
+                </button>
+                
+                {uploadedOverlayImage && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadedOverlayImage(null);
+                      setUploadedOverlayImageObj(null);
+                    }}
+                    style={{
+                      background: 'rgba(244, 63, 94, 0.1)',
+                      border: '1px solid var(--accent-rose)',
+                      borderRadius: '6px',
+                      color: 'var(--accent-rose)',
+                      padding: '6px 10px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              <input
+                type="file"
+                ref={overlayImageInputRef}
+                onChange={handleOverlayImageUpload}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+
+              {uploadedOverlayImage && (
+                <div style={{ marginTop: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                    <span>Overlay Size</span>
+                    <span>{overlayImageSize}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="40"
+                    max="240"
+                    value={overlayImageSize}
+                    onChange={(e) => setOverlayImageSize(parseInt(e.target.value))}
+                    style={{ width: '100%', marginTop: '4px', accentColor: 'var(--accent-purple)' }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ) : (
