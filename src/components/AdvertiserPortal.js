@@ -5,10 +5,10 @@ import MapView from './MapView';
 import Billboard3DPreview from './Billboard3DPreview';
 import PosterDesigner from './PosterDesigner';
 import SmartAnalytics from './SmartAnalytics';
-import { CreditCard, ShoppingBag, Calendar, CheckCircle2, Ticket, Printer, ArrowRight, Sparkles, FileSpreadsheet, Lock, Activity, Eye, Play, Pause } from 'lucide-react';
+import { CreditCard, ShoppingBag, Calendar, CheckCircle2, Ticket, Printer, ArrowRight, Sparkles, FileSpreadsheet, Lock, Activity, Eye, Play, Pause, Heart, Download, Filter, X, Bell, Star, SlidersHorizontal, TrendingUp } from 'lucide-react';
 
-export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme }) {
-  const [activeTab, setActiveTab] = useState('book'); // 'book' or 'active-campaigns'
+export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme, currentUser }) {
+  const [activeTab, setActiveTab] = useState('book'); // 'book', 'active-campaigns', 'saved'
   const [activeBillboard, setActiveBillboard] = useState(billboards[0]);
   const [posterDataUrl, setPosterDataUrl] = useState('');
   const [printOption, setPrintOption] = useState('OptionA'); // 'OptionA' (AdNazar Prints) or 'OptionB' (Owner Prints)
@@ -21,6 +21,41 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi', 'card', 'netbanking'
   const [upiId, setUpiId] = useState('amit@okaxis');
   const [bookingId, setBookingId] = useState('');
+
+  // ── Smart Filters ──
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCity, setFilterCity] = useState('All');
+  const [filterBudgetMax, setFilterBudgetMax] = useState(500000);
+  const [filterTrafficMin, setFilterTrafficMin] = useState(0);
+  const [filterType, setFilterType] = useState('All');
+
+  // ── Saved billboards ──
+  const [savedIds, setSavedIds] = useState(new Set());
+  const toggleSave = (id) => setSavedIds(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+
+  // ── Notification toasts ──
+  const [toasts, setToasts] = useState([]);
+  const addToast = (msg, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, msg, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4500);
+  };
+
+  // Filtered billboards
+  const CITIES = ['All', ...Array.from(new Set(billboards.map(b => b.city)))];
+  const TYPES = ['All', 'Unipole', 'Hoarding', 'Digital LED'];
+  const filteredBillboards = billboards.filter(b => {
+    if (filterCity !== 'All' && b.city !== filterCity) return false;
+    if (b.price > filterBudgetMax) return false;
+    if (b.dailyTraffic < filterTrafficMin) return false;
+    if (filterType !== 'All' && b.billboardType !== filterType) return false;
+    return true;
+  });
+  const savedBillboards = billboards.filter(b => savedIds.has(b.id));
 
   // Live Campaigns simulation states
   const [activeCampaigns, setActiveCampaigns] = useState([
@@ -129,7 +164,18 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
       if (onBookBillboard) {
         onBookBillboard(activeBillboard.id, generatedId);
       }
+
+      // Notification toasts
+      addToast(`🎉 Campaign live! ${activeBillboard.title} is now active.`, 'success');
+      if (newCamp.ctr < 1.0) {
+        setTimeout(() => addToast('⚠️ Low CTR detected on new campaign. Consider premium location.', 'warning'), 3000);
+      }
     }, 2000);
+  };
+
+  // Export Proposal PDF (mock)
+  const handleExportPDF = () => {
+    addToast(`📄 Proposal PDF for "${activeBillboard.title}" downloaded!`, 'success');
   };
 
   // Toggle active campaign pause/play
@@ -149,61 +195,158 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      
-      {/* Tab workspace controller */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid var(--border-glass)',
-        gap: '24px',
-        paddingBottom: '2px'
-      }}>
-        <button
-          onClick={() => setActiveTab('book')}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeTab === 'book' ? '2px solid var(--accent-purple)' : '2px solid transparent',
-            color: activeTab === 'book' ? 'var(--text-primary)' : 'var(--text-muted)',
-            padding: '8px 12px 14px 12px',
-            fontSize: '0.95rem',
-            fontFamily: 'var(--font-mono)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          🔍 Design & Book Hoarding
-        </button>
 
-        <button
-          onClick={() => setActiveTab('active-campaigns')}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeTab === 'active-campaigns' ? '2px solid var(--accent-purple)' : '2px solid transparent',
-            color: activeTab === 'active-campaigns' ? 'var(--text-primary)' : 'var(--text-muted)',
-            padding: '8px 12px 14px 12px',
-            fontSize: '0.95rem',
-            fontFamily: 'var(--font-mono)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          📈 Live Campaigns Tracker 
-          <span className="badge badge-emerald" style={{ fontSize: '0.6rem', padding: '1px 6px' }}>Live</span>
-        </button>
+      {/* Notification Toasts */}
+      <div style={{ position: 'fixed', top: '90px', right: '24px', zIndex: 3000, display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'none' }}>
+        {toasts.map(toast => (
+          <div key={toast.id} className="glass-panel animate-fade-in" style={{
+            padding: '12px 18px', maxWidth: '360px', pointerEvents: 'auto',
+            border: `1px solid ${toast.type === 'warning' ? 'rgba(249,115,22,0.4)' : 'rgba(16,185,129,0.3)'}`,
+            background: toast.type === 'warning' ? 'rgba(249,115,22,0.08)' : 'rgba(16,185,129,0.08)',
+            display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem',
+            color: toast.type === 'warning' ? 'var(--accent-saffron)' : 'var(--accent-emerald)'
+          }}>
+            <Bell style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+            {toast.msg}
+          </div>
+        ))}
       </div>
+
+      {/* Tab workspace controller */}
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', gap: '0', paddingBottom: '2px', flexWrap: 'wrap' }}>
+        {[
+          { key: 'book', label: '🔍 Design & Book', badge: null },
+          { key: 'active-campaigns', label: '📈 Live Campaigns', badge: 'Live' },
+          { key: 'saved', label: '❤️ Saved', badge: savedIds.size > 0 ? String(savedIds.size) : null },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              background: 'transparent', border: 'none',
+              borderBottom: activeTab === tab.key ? '2px solid var(--accent-purple)' : '2px solid transparent',
+              color: activeTab === tab.key ? 'var(--text-primary)' : 'var(--text-muted)',
+              padding: '8px 18px 14px 18px', fontSize: '0.9rem',
+              fontFamily: 'var(--font-mono)', fontWeight: '600', cursor: 'pointer',
+              transition: 'var(--transition-smooth)', display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+          >
+            {tab.label}
+            {tab.badge && <span className="badge badge-emerald" style={{ fontSize: '0.6rem', padding: '1px 6px' }}>{tab.badge}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* ── SAVED BILLBOARDS TAB ── */}
+      {activeTab === 'saved' && (
+        <div className="glass-panel" style={{ padding: '28px', border: '1px solid var(--border-glass)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-mono)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Heart style={{ color: '#fb7185', fill: '#fb7185' }} /> Saved Billboards ({savedBillboards.length})
+          </h3>
+          {savedBillboards.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+              <Heart style={{ width: '40px', height: '40px', margin: '0 auto 12px', opacity: 0.3 }} />
+              <p>No saved billboards yet. Click the ❤️ on any billboard card to save it.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              {savedBillboards.map(board => (
+                <div key={board.id} className="glass-panel-hover" style={{ border: '1px solid rgba(251,113,133,0.2)', borderRadius: '12px', overflow: 'hidden' }}>
+                  <div style={{ height: '130px', position: 'relative' }}>
+                    <img src={board.image} alt={board.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button onClick={() => toggleSave(board.id)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '6px', padding: '4px', cursor: 'pointer' }}>
+                      <Heart style={{ width: '14px', height: '14px', color: '#fb7185', fill: '#fb7185' }} />
+                    </button>
+                  </div>
+                  <div style={{ padding: '14px' }}>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>📍 {board.city}</p>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: '4px 0' }}>{board.title}</h4>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)', fontWeight: '700', fontFamily: 'var(--font-mono)' }}>₹{board.price.toLocaleString()}/mo</p>
+                    <button onClick={() => { setActiveBillboard(board); setActiveTab('book'); }} className="btn-neon-purple" style={{ width: '100%', justifyContent: 'center', marginTop: '10px', padding: '8px', fontSize: '0.78rem' }}>
+                      Book This Billboard <ArrowRight style={{ width: '13px', height: '13px' }} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'book' ? (
         /* ------------------ DESIGN & BOOK WORKSPACE ------------------ */
         <>
+          {/* 0. Smart Filters Panel */}
+          <div className="glass-panel" style={{ padding: '16px 20px', border: '1px solid var(--border-glass)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showFilters ? '16px' : '0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                <SlidersHorizontal style={{ width: '16px', height: '16px', color: 'var(--accent-purple)' }} />
+                <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Smart Filters</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  {filteredBillboards.length} of {billboards.length} locations match
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {(filterCity !== 'All' || filterBudgetMax < 500000 || filterTrafficMin > 0 || filterType !== 'All') && (
+                  <button onClick={() => { setFilterCity('All'); setFilterBudgetMax(500000); setFilterTrafficMin(0); setFilterType('All'); }} className="btn-outline" style={{ padding: '5px 10px', fontSize: '0.72rem', gap: '4px', borderColor: 'rgba(244,63,94,0.3)', color: '#fb7185' }}>
+                    <X style={{ width: '11px', height: '11px' }} /> Clear Filters
+                  </button>
+                )}
+                <button onClick={() => setShowFilters(p => !p)} className="btn-outline" style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '6px' }}>
+                  <Filter style={{ width: '13px', height: '13px' }} />
+                  {showFilters ? 'Hide' : 'Show Filters'}
+                </button>
+              </div>
+            </div>
+
+            {showFilters && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', borderTop: '1px solid var(--border-glass)', paddingTop: '16px' }}>
+                {/* City filter */}
+                <div>
+                  <span className="label-text">CITY / AREA</span>
+                  <select className="input-field" value={filterCity} onChange={e => setFilterCity(e.target.value)} style={{ appearance: 'none', background: 'var(--bg-secondary)' }}>
+                    {CITIES.map(c => <option key={c} value={c} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{c}</option>)}
+                  </select>
+                </div>
+
+                {/* Billboard Type */}
+                <div>
+                  <span className="label-text">BILLBOARD TYPE</span>
+                  <select className="input-field" value={filterType} onChange={e => setFilterType(e.target.value)} style={{ appearance: 'none', background: 'var(--bg-secondary)' }}>
+                    {TYPES.map(t => <option key={t} value={t} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{t}</option>)}
+                  </select>
+                </div>
+
+                {/* Budget slider */}
+                <div>
+                  <span className="label-text">MAX BUDGET: ₹{(filterBudgetMax / 1000).toFixed(0)}K/mo</span>
+                  <input type="range" min="10000" max="500000" step="5000" value={filterBudgetMax}
+                    onChange={e => setFilterBudgetMax(Number(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--accent-purple)', marginTop: '8px' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <span>₹10K</span><span>₹5L</span>
+                  </div>
+                </div>
+
+                {/* Min Traffic */}
+                <div>
+                  <span className="label-text">MIN DAILY TRAFFIC: {filterTrafficMin > 0 ? `${(filterTrafficMin/1000).toFixed(0)}K+` : 'Any'}</span>
+                  <input type="range" min="0" max="200000" step="10000" value={filterTrafficMin}
+                    onChange={e => setFilterTrafficMin(Number(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--accent-cyan)', marginTop: '8px' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <span>Any</span><span>200K+</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 1. Map Navigation Block */}
           <MapView
-            billboards={billboards}
+            billboards={filteredBillboards}
             activeBillboard={activeBillboard}
             setActiveBillboard={setActiveBillboard}
             theme={theme}
@@ -229,7 +372,35 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
             />
           </div>
 
-          {/* 3. Smart Analytics Integration */}
+          {/* 3. Smart Analytics Integration + active billboard header */}
+          <div className="glass-panel" style={{ padding: '16px 20px', border: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '700' }}>{activeBillboard.title}</h3>
+                  {activeBillboard.visibilityScore > 93 && (
+                    <span className="badge badge-saffron" style={{ fontSize: '0.6rem', display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+                      <TrendingUp style={{ width: '9px', height: '9px' }} /> Top Performing
+                    </span>
+                  )}
+                  {activeBillboard.billboardType && (
+                    <span className="badge badge-cyan" style={{ fontSize: '0.6rem' }}>{activeBillboard.billboardType}</span>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>📍 {activeBillboard.location} · ₹{activeBillboard.price.toLocaleString()}/mo</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => toggleSave(activeBillboard.id)} className="btn-outline" style={{ padding: '7px 14px', fontSize: '0.78rem', gap: '6px', borderColor: savedIds.has(activeBillboard.id) ? '#fb7185' : undefined, color: savedIds.has(activeBillboard.id) ? '#fb7185' : undefined }}>
+                <Heart style={{ width: '14px', height: '14px', fill: savedIds.has(activeBillboard.id) ? '#fb7185' : 'none', color: '#fb7185' }} />
+                {savedIds.has(activeBillboard.id) ? 'Saved' : 'Save'}
+              </button>
+              <button onClick={handleExportPDF} className="btn-outline" style={{ padding: '7px 14px', fontSize: '0.78rem', gap: '6px' }}>
+                <Download style={{ width: '14px', height: '14px' }} /> Export Proposal
+              </button>
+            </div>
+          </div>
+
           <SmartAnalytics activeBillboard={activeBillboard} />
 
           {/* 4. Booking Configurator */}

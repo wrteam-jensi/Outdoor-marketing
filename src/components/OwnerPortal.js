@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark, FileText, ArrowRight } from 'lucide-react';
+import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark, FileText, ArrowRight, Bell, CheckCheck, XCircle, Clock, BarChart2 } from 'lucide-react';
 
 export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -12,6 +12,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
     size: '30x15 ft',
     price: '',
     areaType: 'Highway',
+    billboardType: 'Unipole',
     dailyTraffic: '',
     audienceType: 'Professionals & Commuters',
     bestTiming: '08:00 AM - 10:00 PM',
@@ -28,16 +29,39 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [upiHandle, setUpiHandle] = useState('amit@okaxis');
   const [ifscCode, setIfscCode] = useState('HDFC0001234');
   const [showBankSetup, setShowBankSetup] = useState(false);
+
+  // Booking requests mock data
+  const [bookingRequests, setBookingRequests] = useState([
+    { id: 'REQ-8821', advertiser: 'Rohan Mehta', company: 'UrbanEats India', billboard: 'S.G. Highway Digital Unipole', duration: '2 Months', amount: 150000, status: 'Pending', date: '2026-05-20' },
+    { id: 'REQ-7743', advertiser: 'Sneha Patel', company: 'ZenWear Fashion', billboard: 'Juhu Circle Premium Hoarding', duration: '1 Month', amount: 250000, status: 'Pending', date: '2026-05-19' },
+    { id: 'REQ-6654', advertiser: 'Kunal Desai', company: 'TechBridge Labs', billboard: 'Gachibowli Ring Road Digital Wall', duration: '3 Months', amount: 450000, status: 'Accepted', date: '2026-05-17' },
+  ]);
+
+  const handleRequestAction = (id, action) => {
+    setBookingRequests(prev => prev.map(r => r.id === id ? { ...r, status: action === 'accept' ? 'Accepted' : 'Declined' } : r));
+  };
+
+  // Monthly earnings for chart (last 6 months)
+  const earningsChart = [
+    { month: 'Dec', amount: 85000 },
+    { month: 'Jan', amount: 110000 },
+    { month: 'Feb', amount: 95000 },
+    { month: 'Mar', amount: 130000 },
+    { month: 'Apr', amount: 120000 },
+    { month: 'May', amount: monthlyRevenue || 150000 },
+  ];
+  const chartMax = Math.max(...earningsChart.map(e => e.amount));
   
   // Financial metrics mock calculations
   const totalListings = billboards.length;
   const activeBookingsCount = billboards.filter(b => b.availability === 'Booked').length;
   const monthlyRevenue = billboards
     .filter(b => b.availability === 'Booked')
-    .reduce((sum, b) => sum + b.price, 0);
+    .reduce((sum, b) => sum + b.price, 0) || 150000;
   
   const platformCommission = monthlyRevenue * 0.12; // 12% Platform commission
   const netEarnings = monthlyRevenue - platformCommission;
+  const pendingRequests = bookingRequests.filter(r => r.status === 'Pending').length;
 
   // Handle form field change
   const handleChange = (e) => {
@@ -329,6 +353,101 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
         </div>
       )}
 
+      {/* ── BOOKING REQUESTS PANEL ── */}
+      <div className="glass-panel" style={{ padding: '24px', border: '1px solid var(--border-glass)', background: 'var(--bg-glass)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+              <Bell style={{ color: 'var(--accent-cyan)', width: '18px', height: '18px' }} /> Booking Requests
+            </h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Advertisers who want to book your spaces.</p>
+          </div>
+          {pendingRequests > 0 && (
+            <span className="badge badge-saffron" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <Clock style={{ width: '11px', height: '11px' }} /> {pendingRequests} Pending
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {bookingRequests.map(req => (
+            <div key={req.id} style={{
+              display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap',
+              padding: '14px 16px', borderRadius: '10px',
+              background: req.status === 'Pending' ? 'rgba(99,102,241,0.04)' : req.status === 'Accepted' ? 'rgba(16,185,129,0.04)' : 'rgba(244,63,94,0.04)',
+              border: `1px solid ${req.status === 'Pending' ? 'var(--border-glass)' : req.status === 'Accepted' ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)'}`,
+            }}>
+              {/* Avatar */}
+              <div style={{
+                width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-cyan) 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.8rem', fontWeight: '800', color: '#fff'
+              }}>
+                {req.advertiser.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <p style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-primary)' }}>{req.advertiser}</p>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{req.company} · {req.billboard}</p>
+                <p style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>{req.duration} · {req.date}</p>
+              </div>
+              {/* Amount */}
+              <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                <p style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>₹{req.amount.toLocaleString()}</p>
+                <span className={`badge ${req.status === 'Accepted' ? 'badge-emerald' : req.status === 'Declined' ? 'badge-rose' : 'badge-purple'}`} style={{ fontSize: '0.6rem', marginTop: '4px', display: 'inline-block' }}>
+                  {req.status}
+                </span>
+              </div>
+              {/* Actions */}
+              {req.status === 'Pending' && (
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  <button onClick={() => handleRequestAction(req.id, 'accept')} className="btn-outline" style={{ padding: '6px 14px', fontSize: '0.75rem', gap: '4px', borderColor: 'rgba(16,185,129,0.4)', color: 'var(--accent-emerald)' }}>
+                    <CheckCheck style={{ width: '13px', height: '13px' }} /> Accept
+                  </button>
+                  <button onClick={() => handleRequestAction(req.id, 'decline')} className="btn-outline" style={{ padding: '6px 14px', fontSize: '0.75rem', gap: '4px', borderColor: 'rgba(244,63,94,0.3)', color: '#fb7185' }}>
+                    <XCircle style={{ width: '13px', height: '13px' }} /> Decline
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── EARNINGS CHART ── */}
+      <div className="glass-panel" style={{ padding: '24px', border: '1px solid var(--border-glass)', background: 'var(--bg-glass)' }}>
+        <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', color: 'var(--text-primary)' }}>
+          <BarChart2 style={{ color: 'var(--accent-emerald)', width: '18px', height: '18px' }} /> Monthly Earnings (Last 6 Months)
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '160px', paddingBottom: '28px', borderBottom: '1px solid var(--border-glass)' }}>
+          {earningsChart.map((item, i) => {
+            const heightPct = (item.amount / chartMax) * 100;
+            const isLatest = i === earningsChart.length - 1;
+            return (
+              <div key={item.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '-20px', fontSize: '0.6rem', color: isLatest ? 'var(--accent-emerald)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                  {i > 0 && item.amount > earningsChart[i-1].amount ? '↑' : ''} ₹{(item.amount/1000).toFixed(0)}K
+                </span>
+                <div style={{
+                  width: '100%', height: `${heightPct}%`,
+                  background: isLatest ? 'linear-gradient(180deg, var(--accent-emerald) 0%, rgba(16,185,129,0.3) 100%)' : 'rgba(99,102,241,0.25)',
+                  borderRadius: '6px 6px 0 0',
+                  border: isLatest ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--border-glass)',
+                  transition: 'height 0.5s ease', minHeight: '4px'
+                }} />
+                <span style={{ fontSize: '0.65rem', color: isLatest ? 'var(--accent-emerald)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: isLatest ? '700' : '400' }}>{item.month}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: '24px', marginTop: '12px', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+          <span>Net this month: <strong style={{ color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>₹{netEarnings.toLocaleString()}</strong></span>
+          <span>Commission (12%): <strong style={{ color: 'var(--accent-saffron)', fontFamily: 'var(--font-mono)' }}>₹{platformCommission.toLocaleString()}</strong></span>
+          <span>Trend: <strong style={{ color: 'var(--accent-cyan)' }}>↑ +25% MoM</strong></span>
+        </div>
+      </div>
+
       {/* 2. Headline and List Billboard additions trigger */}
       <div style={{
         display: 'flex',
@@ -507,6 +626,21 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
                 >
                   {['Highway', 'Market Area', 'IT Park / Commercial', 'School / College Area', 'Residential'].map(a => (
                     <option key={a} value={a} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{a}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <span className="label-text">Billboard Type</span>
+                <select
+                  name="billboardType"
+                  className="input-field"
+                  value={formData.billboardType}
+                  onChange={handleChange}
+                  style={{ appearance: 'none', background: 'var(--bg-secondary) url("data:image/svg+xml;utf8,<svg fill=\'%2394a3b8\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat 95% center' }}
+                >
+                  {['Unipole', 'Hoarding', 'Digital LED'].map(t => (
+                    <option key={t} value={t} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{t}</option>
                   ))}
                 </select>
               </div>
