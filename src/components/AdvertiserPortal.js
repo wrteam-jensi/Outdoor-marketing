@@ -7,10 +7,21 @@ import PosterDesigner from './PosterDesigner';
 import SmartAnalytics from './SmartAnalytics';
 import { CreditCard, ShoppingBag, Calendar, CheckCircle2, Ticket, Printer, ArrowRight, Sparkles, FileSpreadsheet, Lock, Activity, Eye, Play, Pause, Heart, Download, Filter, X, Bell, Star, SlidersHorizontal, TrendingUp } from 'lucide-react';
 
-export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme, currentUser }) {
+export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme, currentUser, preLoadedPoster, clearPreLoadedPoster }) {
   const [activeTab, setActiveTab] = useState('book'); // 'book', 'active-campaigns', 'saved'
   const [activeBillboard, setActiveBillboard] = useState(billboards[0]);
   const [posterDataUrl, setPosterDataUrl] = useState('');
+
+  // Handle pre-loaded poster URL from AI Poster Studio
+  useEffect(() => {
+    if (preLoadedPoster) {
+      setPosterDataUrl(preLoadedPoster);
+      setTimeout(() => {
+        addToast('Poster design imported from Creative Studio!', 'success');
+      }, 500);
+      clearPreLoadedPoster();
+    }
+  }, [preLoadedPoster]);
   const [printOption, setPrintOption] = useState('OptionA'); // 'OptionA' (AdNazar Prints) or 'OptionB' (Owner Prints)
   const [bookingMonths, setBookingMonths] = useState(1);
   const [startDate, setStartDate] = useState('2026-06-01');

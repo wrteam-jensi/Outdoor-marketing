@@ -7,11 +7,12 @@ import LandingPage from '@/components/LandingPage';
 import AuthModal from '@/components/AuthModal';
 import AdvertiserPortal from '@/components/AdvertiserPortal';
 import OwnerPortal from '@/components/OwnerPortal';
+import PosterStudioPage from '@/components/PosterStudioPage';
 import { INITIAL_BILLBOARDS } from '@/utils/mockData';
 
 export default function Home() {
   // ── View orchestration ──
-  const [view, setView] = useState('landing'); // 'landing' | 'app'
+  const [view, setView] = useState('landing'); // 'landing' | 'studio' | 'app'
   const [currentUser, setCurrentUser] = useState(null); // { name, email, phone, role }
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authDefaultRole, setAuthDefaultRole] = useState('advertiser');
@@ -19,6 +20,9 @@ export default function Home() {
   // ── Portal state ──
   const [activePortal, setActivePortal] = useState('advertiser');
   const [billboards, setBillboards] = useState(INITIAL_BILLBOARDS);
+
+  // ── Pre-loaded design state from standalone studio ──
+  const [preLoadedPoster, setPreLoadedPoster] = useState('');
 
   // ── Theme ──
   const [theme, setTheme] = useState('dark');
@@ -38,12 +42,20 @@ export default function Home() {
   const handleLogin = (user) => {
     setCurrentUser(user);
     setShowAuthModal(false);
-    setView('app');
-    setActivePortal(user.role === 'host' ? 'owner' : 'advertiser');
+    
+    // If user designed a poster and logs in, deploy it directly to Advertiser Hub
+    if (user.role === 'advertiser' && preLoadedPoster) {
+      setView('app');
+      setActivePortal('advertiser');
+    } else {
+      setView('app');
+      setActivePortal(user.role === 'host' ? 'owner' : 'advertiser');
+    }
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setPreLoadedPoster('');
     setView('landing');
     setActivePortal('advertiser');
   };
@@ -51,9 +63,23 @@ export default function Home() {
   const handleGoHome = () => {
     if (currentUser) {
       setView('app');
+      setActivePortal(currentUser.role === 'host' ? 'owner' : 'advertiser');
     } else {
       setView('landing');
     }
+  };
+
+  const handleNavigate = (targetView, portalKey = null) => {
+    setView(targetView);
+    if (portalKey) {
+      setActivePortal(portalKey);
+    }
+  };
+
+  const handleDeployPoster = (posterUrl) => {
+    setPreLoadedPoster(posterUrl);
+    setView('app');
+    setActivePortal('advertiser');
   };
 
   // ── Bookings state ──
@@ -81,18 +107,20 @@ export default function Home() {
 
   const handleAddBillboard = (newBoard) => setBillboards(prev => [...prev, newBoard]);
 
+  // Compute active key for navbar highlight
+  const navbarActiveKey = view === 'studio' ? 'studio' : (view === 'app' ? activePortal : 'landing');
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
       <Navbar
-        activePortal={activePortal}
-        setActivePortal={setActivePortal}
+        navbarActiveKey={navbarActiveKey}
+        onNavigate={handleNavigate}
         theme={theme}
         onThemeToggle={toggleTheme}
         currentUser={currentUser}
         onLogout={handleLogout}
         onShowAuth={handleShowAuth}
-        view={view}
         onGoHome={handleGoHome}
       />
 
@@ -112,6 +140,18 @@ export default function Home() {
         </main>
       )}
 
+      {/* ── STANDALONE CREATIVE STUDIO VIEW ── */}
+      {view === 'studio' && (
+        <main className="animate-fade-in main-content" style={{ flex: 1 }}>
+          <PosterStudioPage
+            theme={theme}
+            currentUser={currentUser}
+            onShowAuth={handleShowAuth}
+            onDeployPoster={handleDeployPoster}
+          />
+        </main>
+      )}
+
       {/* ── APP DASHBOARD VIEW ── */}
       {view === 'app' && (
         <main className="animate-fade-in main-content" style={{ flex: 1 }}>
@@ -124,6 +164,8 @@ export default function Home() {
               onBookBillboard={handleBookBillboard}
               theme={theme}
               currentUser={currentUser}
+              preLoadedPoster={preLoadedPoster}
+              clearPreLoadedPoster={() => setPreLoadedPoster('')}
             />
           )}
 

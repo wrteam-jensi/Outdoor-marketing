@@ -1,30 +1,44 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layers, User, Settings, Sparkles, Sun, Moon, LogOut, LogIn, Menu, X } from 'lucide-react';
+import { Layers, User, Settings, Sparkles, Sun, Moon, LogOut, LogIn, Menu, X, Palette } from 'lucide-react';
 
 export default function Navbar({
-  activePortal,
-  setActivePortal,
+  navbarActiveKey,
+  onNavigate,
   theme,
   onThemeToggle,
   currentUser,
   onLogout,
   onShowAuth,
-  view,
   onGoHome,
 }) {
   const isLoggedIn = !!currentUser;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const portalTabs = isLoggedIn ? [
+  // Global tabs available to everyone
+  const studioTab = {
+    key: 'studio',
+    label: 'AI Poster Studio',
+    icon: <Palette style={{ width: '15px', height: '15px' }} />,
+    activeColor: 'var(--accent-saffron)',
+    activeBg: 'rgba(249,115,22,0.12)',
+    activeBorder: 'rgba(249,115,22,0.3)',
+    view: 'studio',
+    portal: null
+  };
+
+  // Roles-based tabs (only visible when logged in)
+  const roleTabs = isLoggedIn ? [
     currentUser.role === 'advertiser'
-      ? { key: 'advertiser', label: 'Advertiser Hub', icon: <User style={{ width: '15px', height: '15px' }} />, activeColor: 'var(--accent-cyan)', activeBg: 'rgba(6,182,212,0.12)', activeBorder: 'rgba(6,182,212,0.3)' }
+      ? { key: 'advertiser', label: 'Advertiser Hub', icon: <User style={{ width: '15px', height: '15px' }} />, activeColor: 'var(--accent-cyan)', activeBg: 'rgba(6,182,212,0.12)', activeBorder: 'rgba(6,182,212,0.3)', view: 'app', portal: 'advertiser' }
       : null,
     currentUser.role === 'host'
-      ? { key: 'owner', label: 'Billboard Host', icon: <Settings style={{ width: '15px', height: '15px' }} />, activeColor: 'var(--accent-purple)', activeBg: 'rgba(99,102,241,0.12)', activeBorder: 'rgba(99,102,241,0.3)' }
+      ? { key: 'owner', label: 'Billboard Host', icon: <Settings style={{ width: '15px', height: '15px' }} />, activeColor: 'var(--accent-purple)', activeBg: 'rgba(99,102,241,0.12)', activeBorder: 'rgba(99,102,241,0.3)', view: 'app', portal: 'owner' }
       : null,
   ].filter(Boolean) : [];
+
+  const allTabs = [studioTab, ...roleTabs];
 
   return (
     <>
@@ -66,31 +80,29 @@ export default function Navbar({
         </button>
 
         {/* Center tabs — desktop only */}
-        {isLoggedIn && portalTabs.length > 0 && (
-          <div className="navbar-tabs-desktop" style={{
-            display: 'flex', background: 'rgba(255,255,255,0.02)',
-            padding: '4px', borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.05)', gap: '4px'
-          }}>
-            {portalTabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActivePortal(tab.key)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '7px',
-                  background: activePortal === tab.key ? `linear-gradient(135deg,${tab.activeBg} 0%,transparent 100%)` : 'transparent',
-                  border: activePortal === tab.key ? `1px solid ${tab.activeBorder}` : '1px solid transparent',
-                  color: activePortal === tab.key ? tab.activeColor : 'var(--text-secondary)',
-                  padding: '7px 16px', borderRadius: '9px',
-                  fontSize: '0.83rem', fontWeight: '600', fontFamily: 'var(--font-mono)',
-                  cursor: 'pointer', transition: 'var(--transition-smooth)'
-                }}
-              >
-                {tab.icon} {tab.label}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="navbar-tabs-desktop" style={{
+          display: 'flex', background: 'rgba(255,255,255,0.02)',
+          padding: '4px', borderRadius: '12px',
+          border: '1px solid rgba(255,255,255,0.05)', gap: '4px'
+        }}>
+          {allTabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => onNavigate(tab.view, tab.portal)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '7px',
+                background: navbarActiveKey === tab.key ? `linear-gradient(135deg,${tab.activeBg} 0%,transparent 100%)` : 'transparent',
+                border: navbarActiveKey === tab.key ? `1px solid ${tab.activeBorder}` : '1px solid transparent',
+                color: navbarActiveKey === tab.key ? tab.activeColor : 'var(--text-secondary)',
+                padding: '7px 16px', borderRadius: '9px',
+                fontSize: '0.83rem', fontWeight: '600', fontFamily: 'var(--font-mono)',
+                cursor: 'pointer', transition: 'var(--transition-smooth)'
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
 
         {/* Right controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -193,14 +205,14 @@ export default function Navbar({
             )}
 
             {/* Portal tabs in drawer */}
-            {isLoggedIn && portalTabs.map(tab => (
-              <button key={tab.key} onClick={() => { setActivePortal(tab.key); setMobileMenuOpen(false); }}
+            {allTabs.map(tab => (
+              <button key={tab.key} onClick={() => { onNavigate(tab.view, tab.portal); setMobileMenuOpen(false); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px',
-                  background: activePortal === tab.key ? `rgba(99,102,241,0.12)` : 'var(--bg-secondary)',
-                  border: `1px solid ${activePortal === tab.key ? 'rgba(99,102,241,0.3)' : 'var(--border-glass)'}`,
+                  background: navbarActiveKey === tab.key ? `rgba(99,102,241,0.12)` : 'var(--bg-secondary)',
+                  border: `1px solid ${navbarActiveKey === tab.key ? 'rgba(99,102,241,0.3)' : 'var(--border-glass)'}`,
                   borderRadius: '10px', cursor: 'pointer', width: '100%', textAlign: 'left',
-                  color: activePortal === tab.key ? tab.activeColor : 'var(--text-primary)',
+                  color: navbarActiveKey === tab.key ? tab.activeColor : 'var(--text-primary)',
                   fontWeight: '600', fontSize: '0.95rem', fontFamily: 'var(--font-sans)'
                 }}>
                 {tab.icon} {tab.label}
