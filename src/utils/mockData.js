@@ -11,6 +11,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 94,
     dailyTraffic: 145000,
+    billboardType: 'Digital LED',
     areaType: 'Highway',
     audienceType: 'Professionals & Shoppers',
     bestTiming: '08:00 AM - 11:00 PM',
@@ -34,6 +35,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 98,
     dailyTraffic: 190000,
+    billboardType: 'Hoarding',
     areaType: 'Market / Beach Front',
     audienceType: 'High-income Families & Youth',
     bestTiming: '05:00 PM - 02:00 AM',
@@ -57,6 +59,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 96,
     dailyTraffic: 220000,
+    billboardType: 'Hoarding',
     areaType: 'IT Park / Commercial',
     audienceType: 'Corporate Employees & Techies',
     bestTiming: '09:00 AM - 09:00 PM',
@@ -81,6 +84,7 @@ export const INITIAL_BILLBOARDS = [
     nextAvailableDate: '2026-06-10',
     visibilityScore: 91,
     dailyTraffic: 110000,
+    billboardType: 'Unipole',
     areaType: 'Market Area',
     audienceType: 'Techies, Foodies & College Students',
     bestTiming: '12:00 PM - 11:00 PM',
@@ -104,6 +108,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 88,
     dailyTraffic: 85000,
+    billboardType: 'Unipole',
     areaType: 'School / College Area',
     audienceType: 'Students & Young Professionals',
     bestTiming: '09:00 AM - 10:00 PM',
@@ -127,6 +132,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 95,
     dailyTraffic: 175000,
+    billboardType: 'Digital LED',
     areaType: 'Highway / Commercial',
     audienceType: 'IT Professionals & Airport Commuters',
     bestTiming: '07:00 AM - 10:00 PM',
@@ -150,6 +156,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 93,
     dailyTraffic: 130000,
+    billboardType: 'Hoarding',
     areaType: 'IT Park / Commercial',
     audienceType: 'Software Engineers & Suburban Commuters',
     bestTiming: '08:00 AM - 10:00 PM',
@@ -173,6 +180,7 @@ export const INITIAL_BILLBOARDS = [
     availability: 'Available',
     visibilityScore: 97,
     dailyTraffic: 150000,
+    billboardType: 'Digital LED',
     areaType: 'Market Area',
     audienceType: 'Shoppers, Food Lovers & Club Goers',
     bestTiming: '04:00 PM - Midnight',
@@ -279,4 +287,69 @@ export const REVENUE_STATS = {
   premiumListingFee: 2500, // in INR
   posterDesignCharges: 999, // in INR
   printingChargesPerSqFt: 45 // in INR
+};
+
+export const CITY_PRICING = [
+  { city: 'Mumbai', flag: '🏙️', minPrice: 150000, maxPrice: 350000, cpm: 42, topArea: 'Juhu, Bandra, Andheri', trafficM: '190K+' },
+  { city: 'Delhi-NCR', flag: '🕌', minPrice: 100000, maxPrice: 280000, cpm: 38, topArea: 'Cyber City, Connaught Place', trafficM: '220K+' },
+  { city: 'Bangalore', flag: '🌿', minPrice: 70000, maxPrice: 200000, cpm: 31, topArea: 'Koramangala, Whitefield', trafficM: '110K+' },
+  { city: 'Hyderabad', flag: '💎', minPrice: 80000, maxPrice: 220000, cpm: 29, topArea: 'Gachibowli, HITEC City', trafficM: '175K+' },
+  { city: 'Ahmedabad', flag: '🏗️', minPrice: 45000, maxPrice: 150000, cpm: 22, topArea: 'S.G. Highway, Navrangpura', trafficM: '145K+' },
+  { city: 'Pune', flag: '🎓', minPrice: 35000, maxPrice: 110000, cpm: 19, topArea: 'FC Road, Hinjewadi', trafficM: '85K+' },
+  { city: 'Chennai', flag: '🎭', minPrice: 60000, maxPrice: 180000, cpm: 27, topArea: 'OMR, T. Nagar', trafficM: '130K+' },
+  { city: 'Kolkata', flag: '📚', minPrice: 80000, maxPrice: 200000, cpm: 33, topArea: 'Park Street, Salt Lake', trafficM: '150K+' },
+];
+
+export const TESTIMONIALS = [
+  {
+    id: 't1',
+    name: 'Rohan Mehta',
+    role: 'Marketing Head',
+    company: 'UrbanEats India',
+    avatar: 'RM',
+    avatarColor: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)',
+    quote: 'AdNazar helped us run hyper-local campaigns in 4 cities within a week. The visibility scores and 3D preview completely removed our guesswork. ROI was 2.1x our digital spend.',
+    city: 'Mumbai',
+    campaignType: 'Food & Delivery',
+    rating: 5
+  },
+  {
+    id: 't2',
+    name: 'Priya Venkatesh',
+    role: 'Founder & CEO',
+    company: 'ZenWear Fashion',
+    avatar: 'PV',
+    avatarColor: 'linear-gradient(135deg, #f97316 0%, #eab308 100%)',
+    quote: 'We booked 3 Bangalore boards in under 30 minutes with the AI poster studio — incredible. The Hinglish slogan generator created our best-performing campaign copy ever.',
+    city: 'Bangalore',
+    campaignType: 'Fashion & Retail',
+    rating: 5
+  },
+  {
+    id: 't3',
+    name: 'Amit Gupta',
+    role: 'Business Owner',
+    company: 'Gupta Properties',
+    avatar: 'AG',
+    avatarColor: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+    quote: 'Listing my 5 hoardings on AdNazar brought me 2 new long-term advertisers in the first month. Zero listing fee and the earnings dashboard is super clean.',
+    city: 'Ahmedabad',
+    campaignType: 'Billboard Host',
+    rating: 5
+  }
+];
+
+export const HOW_IT_WORKS = {
+  advertiser: [
+    { step: '01', icon: '🗺️', title: 'Discover Locations', desc: 'Browse our GPS map with 1,000+ verified billboard spots across India. Filter by city, budget, traffic volume, and board type.' },
+    { step: '02', icon: '🎨', title: 'Design Your Campaign', desc: 'Use our AI poster studio to generate Hinglish/English slogans and preview your ad on a 3D virtual highway before committing.' },
+    { step: '03', icon: '📊', title: 'Analyse & Compare', desc: 'Check visibility scores, daily traffic counts, ROI projections, and competitor density for each location.' },
+    { step: '04', icon: '💳', title: 'Book & Go Live', desc: 'Checkout via UPI, Card, or Net Banking through our Razorpay gateway. Your campaign goes live in 48 hours.' },
+  ],
+  host: [
+    { step: '01', icon: '📸', title: 'List Your Billboard', desc: 'Register your hoarding, unipole, or digital LED screen in minutes. Upload photos, set your price, and go live for free.' },
+    { step: '02', icon: '✅', title: 'Get Verified', desc: 'Our team verifies your location data and site photos within 24 hours. Approved sites get featured in search results immediately.' },
+    { step: '03', icon: '📥', title: 'Receive Bookings', desc: 'Advertisers discover and book your space directly. You get notified instantly for each new booking request.' },
+    { step: '04', icon: '💰', title: 'Earn Monthly', desc: 'Get NEFT/UPI payouts directly to your bank account every month. Transparent earnings dashboard with zero hidden fees.' },
+  ]
 };
