@@ -30,7 +30,7 @@ export default function AuthModal({ onClose, onLogin, defaultRole = 'advertiser'
   useEffect(() => {
     if (tab === 'login') {
       setLoginEmail(DEMO_USERS[role].email);
-      setLoginPassword('');
+      setLoginPassword(DEMO_USERS[role].password);
       setError('');
     }
   }, [tab, role]);
