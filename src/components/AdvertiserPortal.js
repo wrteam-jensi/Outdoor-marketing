@@ -213,7 +213,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
       </div>
 
       {/* Tab workspace controller */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', gap: '0', paddingBottom: '2px', flexWrap: 'wrap' }}>
+      <div className="portal-tab-bar">
         {[
           { key: 'book', label: '🔍 Design & Book', badge: null },
           { key: 'active-campaigns', label: '📈 Live Campaigns', badge: 'Live' },
@@ -249,7 +249,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
               <p>No saved billboards yet. Click the ❤️ on any billboard card to save it.</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            <div className="saved-grid">
               {savedBillboards.map(board => (
                 <div key={board.id} className="glass-panel-hover" style={{ border: '1px solid rgba(251,113,133,0.2)', borderRadius: '12px', overflow: 'hidden' }}>
                   <div style={{ height: '130px', position: 'relative' }}>
@@ -300,7 +300,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
             </div>
 
             {showFilters && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', borderTop: '1px solid var(--border-glass)', paddingTop: '16px' }}>
+              <div className="filter-grid" style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '16px' }}>
                 {/* City filter */}
                 <div>
                   <span className="label-text">CITY / AREA</span>
@@ -353,12 +353,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
           />
 
           {/* 2. Double-Engine Design Studio Frame */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            xl: '1.1fr 1fr',
-            gap: '24px'
-          }}>
+          <div className="design-studio-grid">
             <PosterDesigner
               canvasRef={canvasRef}
               onPosterChange={(dataUrl) => setPosterDataUrl(dataUrl)}
@@ -404,13 +399,9 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
           <SmartAnalytics activeBillboard={activeBillboard} />
 
           {/* 4. Booking Configurator */}
-          <div className="glass-panel" style={{
+          <div className="glass-panel booking-config-grid" style={{
             padding: '28px',
             border: '1px solid var(--border-glass)',
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            lg: '1.4fr 1fr',
-            gap: '32px'
           }}>
             {/* Selection Configuration options */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -423,11 +414,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
                 </p>
               </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '16px'
-              }}>
+              <div className="campaign-date-grid">
                 <div>
                   <span className="label-text">Select Campaign Start Date</span>
                   <input
@@ -458,14 +445,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
                 <span className="label-text" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Printer style={{ width: '14px', height: '14px', color: 'var(--accent-purple)' }} /> Choose Printing & Installation Service
                 </span>
-                
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr',
-                  md: '1fr 1fr',
-                  gap: '16px',
-                  marginTop: '8px'
-                }}>
+                <div className="print-options-grid">
                   {/* Option A */}
                   <div
                     onClick={() => setPrintOption('OptionA')}
@@ -641,7 +621,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+          <div className="campaign-cards-grid">
             {activeCampaigns.map((camp) => {
               const isPaused = camp.status === 'Paused';
               return (

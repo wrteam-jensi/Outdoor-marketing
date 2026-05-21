@@ -141,11 +141,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* 1. Host Dashboard Financial Stats */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '20px'
-      }}>
+      <div className="owner-metrics-grid">
         {/* Metric Card 1 */}
         <div className="glass-panel" style={{
           padding: '24px',
@@ -298,12 +294,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
             AdNazar settles payouts directly through IMPS/NEFT transfers. Provide your details below.
           </p>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginTop: '16px'
-          }}>
+          <div className="owner-form-grid" style={{ marginTop: '16px' }}>
             <div>
               <span className="label-text">IFSC CODE</span>
               <input
@@ -420,7 +411,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
         <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', color: 'var(--text-primary)' }}>
           <BarChart2 style={{ color: 'var(--accent-emerald)', width: '18px', height: '18px' }} /> Monthly Earnings (Last 6 Months)
         </h3>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '160px', paddingBottom: '28px', borderBottom: '1px solid var(--border-glass)' }}>
+        <div className="earnings-chart-wrap" style={{ paddingBottom: '28px', borderBottom: '1px solid var(--border-glass)' }}>
           {earningsChart.map((item, i) => {
             const heightPct = (item.amount / chartMax) * 100;
             const isLatest = i === earningsChart.length - 1;
@@ -530,11 +521,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
             </h3>
 
             {/* specification Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '20px'
-            }}>
+            <div className="owner-form-grid">
               <div>
                 <span className="label-text">Hoarding Title / Name</span>
                 <input
@@ -748,7 +735,7 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           Site Portfolio & Operational Status
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        <div className="owner-boards-grid">
           {billboards.map((board) => {
             return (
               <div
