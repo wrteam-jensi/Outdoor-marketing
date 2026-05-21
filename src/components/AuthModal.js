@@ -85,6 +85,7 @@ export default function AuthModal({ onClose, onLogin, defaultRole = 'advertiser'
 
   return (
     <div
+      className="auth-modal-backdrop"
       style={{
         position: 'fixed', inset: 0, zIndex: 2000,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -96,7 +97,7 @@ export default function AuthModal({ onClose, onLogin, defaultRole = 'advertiser'
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="glass-panel animate-fade-in"
+        className="glass-panel animate-fade-in auth-modal-card"
         style={{
           width: '100%', maxWidth: '480px',
           background: 'var(--bg-secondary)',
