@@ -1,90 +1,110 @@
 'use client';
 
 import React from 'react';
-import { Mail, Phone, MapPin, Globe, Shield, Heart } from 'lucide-react';
+import { Layers, Mail, Phone, MapPin, Shield, Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="glass-panel" style={{
-      margin: '40px 24px 24px 24px',
-      padding: '40px 32px 24px 32px',
-      border: '1px solid var(--border-glass)',
+    <footer style={{
+      margin: '0',
+      padding: '56px 32px 32px',
+      background: 'var(--bg-secondary)',
+      borderTop: '1px solid var(--border-glass)',
       display: 'flex',
       flexDirection: 'column',
-      gap: '32px',
-      background: 'var(--bg-glass)'
+      gap: '40px',
     }}>
       <div style={{
+        maxWidth: '1100px',
+        margin: '0 auto',
+        width: '100%',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '40px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '40px',
       }}>
-        {/* About */}
+        {/* Brand */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="text-gradient">AdNazar</span>
-          </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            India's next-generation tech-enabled OOH (Out-of-Home) Outdoor Advertising Marketplace. We bridge the gap between billboard hosts and growing Indian enterprises using interactive 3D simulated night highways, real-time traffic statistics, and automated digital ledger bookings.
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              background: 'var(--accent-purple)',
+              width: '36px', height: '36px', borderRadius: '9px',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              boxShadow: 'var(--shadow-neon-purple)', flexShrink: 0,
+            }}>
+              <Layers style={{ color: '#ffffff', width: '17px', height: '17px' }} />
+            </div>
+            <h2 style={{ fontSize: '1.2rem' }}>
+              <span className="text-gradient">AdNazar</span>
+            </h2>
+          </div>
+          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: '1.75', maxWidth: '300px' }}>
+            India&apos;s next-generation tech-enabled OOH Advertising Marketplace. Bridging billboard hosts and growing brands with 3D previews, real-time analytics, and instant booking.
           </p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <span className="badge badge-saffron">Three.js 3D</span>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <span className="badge badge-purple">Three.js 3D</span>
             <span className="badge badge-cyan">GPS Map</span>
             <span className="badge badge-emerald">Live Analytics</span>
           </div>
         </div>
 
-        {/* Categories */}
+        {/* Sectors */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Target Sectors</h3>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            <li>🏢 Real Estate & Commercial Launches</li>
-            <li>🛍️ Local Businesses & Retail Outlets</li>
-            <li>🗳️ Political & Public Awareness Campaigns</li>
-            <li>🎉 Entertainment Events & Concerts</li>
-            <li>🍽️ Restaurant & Food Brand Promotions</li>
+          <h3 style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Target Sectors
+          </h3>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+            <li>🏢 Real Estate &amp; Commercial Launches</li>
+            <li>🛍️ Local Businesses &amp; Retail Outlets</li>
+            <li>🗳️ Political &amp; Public Awareness Campaigns</li>
+            <li>🎉 Entertainment Events &amp; Concerts</li>
+            <li>🍽️ Restaurant &amp; Food Brand Promotions</li>
           </ul>
         </div>
 
-        {/* Quick Links */}
+        {/* Contact */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Contact & Support</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <h3 style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Contact &amp; Support
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Mail style={{ width: '16px', height: '16px', color: 'var(--accent-saffron)' }} />
+              <Mail style={{ width: '15px', height: '15px', color: 'var(--accent-saffron)', flexShrink: 0 }} />
               support@adnazar.in
             </p>
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Phone style={{ width: '16px', height: '16px', color: 'var(--accent-purple)' }} />
+              <Phone style={{ width: '15px', height: '15px', color: 'var(--accent-purple)', flexShrink: 0 }} />
               +91 1800 233 4567 (Toll-Free)
             </p>
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <MapPin style={{ width: '16px', height: '16px', color: 'var(--accent-rose)' }} />
+              <MapPin style={{ width: '15px', height: '15px', color: 'var(--accent-rose)', flexShrink: 0 }} />
               Connaught Place, New Delhi, India
             </p>
           </div>
         </div>
       </div>
 
-      <hr style={{ border: 'none', height: '1px', background: 'var(--border-glass)' }} />
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px',
-        fontSize: '0.8rem',
-        color: 'var(--text-muted)'
-      }}>
-        <p>© 2026 AdNazar Technologies Private Limited. All rights reserved.</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <p style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-            <Shield style={{ width: '14px', height: '14px', color: 'var(--accent-emerald)' }} /> Secure Razorpay Gateway Enabled
-          </p>
-          <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Made with <Heart style={{ width: '12px', height: '12px', color: 'var(--accent-saffron)', fill: 'var(--accent-saffron)' }} /> in India
-          </p>
+      {/* Bottom bar */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+        <div style={{ height: '1px', background: 'var(--border-glass)', marginBottom: '24px' }} />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          fontSize: '0.78rem',
+          color: 'var(--text-muted)',
+        }}>
+          <p>© 2026 AdNazar Technologies Private Limited. All rights reserved.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+              <Shield style={{ width: '13px', height: '13px', color: 'var(--accent-emerald)' }} />
+              Secure Razorpay Gateway
+            </p>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Made with <Heart style={{ width: '12px', height: '12px', color: 'var(--accent-rose)', fill: 'var(--accent-rose)', margin: '0 2px' }} /> in India
+            </p>
+          </div>
         </div>
       </div>
     </footer>

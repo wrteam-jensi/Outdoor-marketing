@@ -25,7 +25,7 @@ export default function Home() {
   const [preLoadedPoster, setPreLoadedPoster] = useState('');
 
   // ── Theme ──
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', theme);
