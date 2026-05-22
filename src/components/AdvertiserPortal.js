@@ -285,6 +285,67 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
         </div>
       )}
 
+      {/* ── BECOME A HOST TAB ── */}
+      {activeTab === 'become-host' && (
+        <div className="glass-panel animate-fade-in" style={{ padding: '40px 32px', border: '1px solid var(--border-glass)', maxWidth: '640px', margin: '0 auto', width: '100%' }}>
+          {hostUpgradeStatus === null && (
+            <>
+              <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🏗️</div>
+                <h2 style={{ fontSize: '1.6rem', fontWeight: '800', marginBottom: '10px' }}>Become a Billboard Host</h2>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', maxWidth: '440px', margin: '0 auto' }}>
+                  Own outdoor spaces? List your billboards on AdNazar and start earning passive income from brands looking for premium visibility.
+                </p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '32px' }}>
+                {[
+                  { icon: '💰', title: 'Earn Monthly', desc: 'Get paid every month for your billboard space' },
+                  { icon: '📊', title: 'Live Analytics', desc: 'Track impressions, bookings & revenue in real-time' },
+                  { icon: '🤝', title: 'Vetted Brands', desc: 'Only quality advertisers approved by AdNazar' },
+                  { icon: '⚡', title: 'Instant Listing', desc: 'Your billboard goes live within 24 hours' },
+                ].map(b => (
+                  <div key={b.title} style={{ padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '6px' }}>{b.icon}</div>
+                    <p style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '4px' }}>{b.title}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{b.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <button onClick={onRequestHostUpgrade} className="btn-neon-saffron" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem' }}>
+                🚀 Request Host Access
+              </button>
+              <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '14px' }}>
+                Review typically completes in a few moments. No paperwork needed.
+              </p>
+            </>
+          )}
+          {hostUpgradeStatus === 'pending' && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px', display: 'inline-block' }}>⏳</div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '10px' }}>Request Under Review</h2>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '24px' }}>
+                Your host upgrade request is being reviewed. This usually takes just a few seconds…
+              </p>
+              <div style={{ height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: '60%', background: 'var(--accent-saffron)', borderRadius: '3px' }} />
+              </div>
+            </div>
+          )}
+          {hostUpgradeStatus === 'approved' && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🎉</div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px', color: 'var(--accent-emerald)' }}>You&apos;re Approved!</h2>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '28px' }}>
+                Congratulations! Your host account is ready. Switch to the Host Dashboard to list your billboards and start earning.
+              </p>
+              <button onClick={onUpgradeToHost} className="btn-neon-purple" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem' }}>
+                Open Host Dashboard →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {activeTab === 'book' ? (
         /* ------------------ DESIGN & BOOK WORKSPACE ------------------ */
         <>

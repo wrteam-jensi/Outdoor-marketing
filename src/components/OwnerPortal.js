@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark, FileText, ArrowRight, Bell, CheckCheck, XCircle, Clock, BarChart2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { PlusCircle, Image as ImageIcon, MapPin, DollarSign, BarChart3, Wallet, Sparkles, CheckCircle2, TrendingUp, Landmark, FileText, ArrowRight, Bell, CheckCheck, XCircle, Clock, BarChart2, Upload, Palette } from 'lucide-react';
 
 export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -29,6 +29,24 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
   const [upiHandle, setUpiHandle] = useState('amit@okaxis');
   const [ifscCode, setIfscCode] = useState('HDFC0001234');
   const [showBankSetup, setShowBankSetup] = useState(false);
+
+  // ── Poster Upload state ──
+  const [posterBillboardId, setPosterBillboardId] = useState(billboards[0]?.id || '');
+  const [posterPreviewUrl, setPosterPreviewUrl] = useState('');
+  const [posterSaved, setPosterSaved] = useState(false);
+  const posterFileRef = useRef(null);
+
+  const handlePosterFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPosterPreviewUrl(URL.createObjectURL(file));
+    setPosterSaved(false);
+  };
+
+  const handleSavePoster = () => {
+    setPosterSaved(true);
+    setTimeout(() => setPosterSaved(false), 3000);
+  };
 
   // Booking requests mock data
   const [bookingRequests, setBookingRequests] = useState([
@@ -825,6 +843,119 @@ export default function OwnerPortal({ billboards, onAddBillboard }) {
           })}
         </div>
       </div>
+
+      {/* ── POSTER UPLOAD STUDIO ── */}
+      <div className="glass-panel" style={{ padding: '28px', border: '1px solid var(--border-glass)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '16px' }}>
+          <Palette style={{ color: 'var(--accent-purple)', width: '20px', height: '20px' }} />
+          <h3 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>Poster Upload Studio</h3>
+          <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '0.65rem' }}>For Your Billboards</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          {/* Left — controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Billboard selector */}
+            <div>
+              <span className="label-text">SELECT BILLBOARD</span>
+              <select
+                className="input-field"
+                value={posterBillboardId}
+                onChange={e => { setPosterBillboardId(e.target.value); setPosterPreviewUrl(''); setPosterSaved(false); }}
+              >
+                {billboards.map(b => (
+                  <option key={b.id} value={b.id}>{b.title} — {b.city}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Upload dropzone */}
+            <div>
+              <span className="label-text">UPLOAD POSTER IMAGE</span>
+              <input
+                ref={posterFileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handlePosterFile}
+              />
+              <div
+                onClick={() => posterFileRef.current?.click()}
+                style={{
+                  border: `2px dashed ${posterPreviewUrl ? 'var(--accent-emerald)' : 'var(--border-glass)'}`,
+                  borderRadius: '10px', padding: '32px 16px', textAlign: 'center',
+                  cursor: 'pointer', transition: 'var(--transition-smooth)',
+                  background: posterPreviewUrl ? 'var(--accent-emerald-glow)' : 'var(--bg-tertiary)',
+                }}
+              >
+                <Upload style={{ width: '24px', height: '24px', color: 'var(--text-muted)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  {posterPreviewUrl ? '✓ Poster uploaded — click to replace' : 'Click to upload poster'}
+                </p>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>PNG, JPG, WEBP · Max 10MB</p>
+              </div>
+            </div>
+
+            {/* Save button */}
+            {posterPreviewUrl && (
+              <button
+                onClick={handleSavePoster}
+                className={posterSaved ? 'btn-outline' : 'btn-neon-purple'}
+                style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '0.9rem' }}
+              >
+                {posterSaved ? '✓ Poster saved to listing!' : 'Save Poster to Billboard Listing'}
+              </button>
+            )}
+            {!posterPreviewUrl && (
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                Upload a poster to show advertisers what their ad will look like on your billboard. Accepted formats: PNG, JPG, WEBP.
+              </p>
+            )}
+          </div>
+
+          {/* Right — preview */}
+          <div>
+            <span className="label-text">BILLBOARD PREVIEW</span>
+            <div style={{
+              borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-glass)',
+              background: 'var(--bg-tertiary)', minHeight: '200px', position: 'relative',
+            }}>
+              {/* Billboard base image */}
+              <img
+                src={billboards.find(b => b.id === posterBillboardId)?.image || ''}
+                alt="Billboard"
+                style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
+              />
+              {/* Poster overlay */}
+              {posterPreviewUrl && (
+                <div style={{
+                  position: 'absolute', top: '12%', left: '10%', width: '80%', height: '55%',
+                  borderRadius: '4px', overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  border: '3px solid rgba(255,255,255,0.8)',
+                }}>
+                  <img src={posterPreviewUrl} alt="Poster" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
+              {!posterPreviewUrl && (
+                <div style={{
+                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.3)', flexDirection: 'column', gap: '6px',
+                }}>
+                  <ImageIcon style={{ width: '28px', height: '28px', color: 'rgba(255,255,255,0.6)' }} />
+                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', fontWeight: '600' }}>Upload to preview</p>
+                </div>
+              )}
+            </div>
+            {posterPreviewUrl && (
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
+                Poster composited on billboard preview
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
