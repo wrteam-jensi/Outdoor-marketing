@@ -73,12 +73,13 @@ export default function AuthModal({ onClose, onLogin, defaultRole = 'advertiser'
       setIsLoading(false);
       setSuccessMsg('Account created! Logging you in...');
       setTimeout(() => {
-        onLogin({ name: signupName, email: signupEmail, phone: signupPhone, role });
+        // New users always start as advertiser; they can request host upgrade from dashboard
+        onLogin({ name: signupName, email: signupEmail, phone: signupPhone, role: 'advertiser' });
       }, 1000);
     }, 1400);
   };
 
-  const roleOptions = [
+  const loginRoleOptions = [
     { key: 'advertiser', label: 'Advertiser', desc: 'Find & book billboard locations', icon: '🎯', color: 'var(--accent-purple)' },
     { key: 'host', label: 'Billboard Host', desc: 'List & manage your properties', icon: '🏗️', color: 'var(--accent-saffron)' },
   ];
@@ -175,30 +176,47 @@ export default function AuthModal({ onClose, onLogin, defaultRole = 'advertiser'
               : 'Join India\'s leading outdoor ad marketplace.'}
           </p>
 
-          {/* Role Selector */}
-          <div style={{ marginBottom: '20px' }}>
-            <span className="label-text" style={{ marginBottom: '8px' }}>I AM A</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {roleOptions.map(opt => (
-                <button
-                  key={opt.key}
-                  onClick={() => { setRole(opt.key); setError(''); }}
-                  style={{
-                    padding: '12px', border: `1px solid ${role === opt.key ? opt.color : 'var(--border-glass)'}`,
-                    borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
-                    background: role === opt.key ? `rgba(${opt.key === 'advertiser' ? '99,102,241' : '249,115,22'},0.08)` : 'transparent',
-                    transition: 'var(--transition-smooth)', fontFamily: 'var(--font-sans)'
-                  }}
-                >
-                  <div style={{ fontSize: '1.3rem', marginBottom: '4px' }}>{opt.icon}</div>
-                  <div style={{ fontWeight: '700', fontSize: '0.85rem', color: role === opt.key ? opt.color : 'var(--text-primary)' }}>
-                    {opt.label}
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>{opt.desc}</div>
-                </button>
-              ))}
+          {/* Role Selector — login only; signup always creates Advertiser */}
+          {tab === 'login' ? (
+            <div style={{ marginBottom: '20px' }}>
+              <span className="label-text" style={{ marginBottom: '8px' }}>I AM A</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {loginRoleOptions.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setRole(opt.key); setError(''); }}
+                    style={{
+                      padding: '12px', border: `1px solid ${role === opt.key ? opt.color : 'var(--border-glass)'}`,
+                      borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
+                      background: role === opt.key ? `rgba(${opt.key === 'advertiser' ? '79,70,229' : '217,119,6'},0.08)` : 'transparent',
+                      transition: 'var(--transition-smooth)', fontFamily: 'var(--font-sans)'
+                    }}
+                  >
+                    <div style={{ fontSize: '1.3rem', marginBottom: '4px' }}>{opt.icon}</div>
+                    <div style={{ fontWeight: '700', fontSize: '0.85rem', color: role === opt.key ? opt.color : 'var(--text-primary)' }}>
+                      {opt.label}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div style={{
+              marginBottom: '20px', padding: '12px 14px',
+              background: 'var(--accent-purple-glow)',
+              border: '1px solid rgba(79,70,229,0.18)',
+              borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px'
+            }}>
+              <span style={{ fontSize: '1.4rem' }}>🎯</span>
+              <div>
+                <p style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-purple)' }}>Starting as Advertiser</p>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                  You can request a Host upgrade from your dashboard after signing up.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Success message */}
           {successMsg && (

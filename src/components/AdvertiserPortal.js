@@ -7,7 +7,7 @@ import PosterDesigner from './PosterDesigner';
 import SmartAnalytics from './SmartAnalytics';
 import { CreditCard, ShoppingBag, Calendar, CheckCircle2, Ticket, Printer, ArrowRight, Sparkles, FileSpreadsheet, Lock, Activity, Eye, Play, Pause, Heart, Download, Filter, X, Bell, Star, SlidersHorizontal, TrendingUp } from 'lucide-react';
 
-export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme, currentUser, preLoadedPoster, clearPreLoadedPoster }) {
+export default function AdvertiserPortal({ billboards, bookings, onBookBillboard, theme, currentUser, preLoadedPoster, clearPreLoadedPoster, hostUpgradeStatus, onRequestHostUpgrade, onUpgradeToHost }) {
   const [activeTab, setActiveTab] = useState('book'); // 'book', 'active-campaigns', 'saved'
   const [activeBillboard, setActiveBillboard] = useState(billboards[0]);
   const [posterDataUrl, setPosterDataUrl] = useState('');
@@ -229,6 +229,7 @@ export default function AdvertiserPortal({ billboards, bookings, onBookBillboard
           { key: 'book', label: '🔍 Design & Book', badge: null },
           { key: 'active-campaigns', label: '📈 Live Campaigns', badge: 'Live' },
           { key: 'saved', label: '❤️ Saved', badge: savedIds.size > 0 ? String(savedIds.size) : null },
+          { key: 'become-host', label: '🏗️ Become a Host', badge: hostUpgradeStatus === 'approved' ? '✓' : hostUpgradeStatus === 'pending' ? '…' : null },
         ].map(tab => (
           <button
             key={tab.key}

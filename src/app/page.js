@@ -21,6 +21,20 @@ export default function Home() {
   const [activePortal, setActivePortal] = useState('advertiser');
   const [billboards, setBillboards] = useState(INITIAL_BILLBOARDS);
 
+  // ── Become-a-Host upgrade flow ──
+  const [hostUpgradeStatus, setHostUpgradeStatus] = useState(null); // null | 'pending' | 'approved'
+
+  const handleRequestHostUpgrade = () => {
+    setHostUpgradeStatus('pending');
+    setTimeout(() => setHostUpgradeStatus('approved'), 4000);
+  };
+
+  const handleUpgradeToHost = () => {
+    setCurrentUser(prev => ({ ...prev, role: 'host' }));
+    setActivePortal('owner');
+    setHostUpgradeStatus(null);
+  };
+
   // ── Pre-loaded design state from standalone studio ──
   const [preLoadedPoster, setPreLoadedPoster] = useState('');
 
@@ -58,6 +72,7 @@ export default function Home() {
     setPreLoadedPoster('');
     setView('landing');
     setActivePortal('advertiser');
+    setHostUpgradeStatus(null);
   };
 
   const handleGoHome = () => {
@@ -166,6 +181,9 @@ export default function Home() {
               currentUser={currentUser}
               preLoadedPoster={preLoadedPoster}
               clearPreLoadedPoster={() => setPreLoadedPoster('')}
+              hostUpgradeStatus={hostUpgradeStatus}
+              onRequestHostUpgrade={handleRequestHostUpgrade}
+              onUpgradeToHost={handleUpgradeToHost}
             />
           )}
 
